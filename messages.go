@@ -11,6 +11,7 @@ type Token [16]byte
 type message interface {
 	readFrom(io.Reader) error
 	writeTo(io.Writer) error
+	id() int32
 }
 
 type tokenPrefixedMessage struct {
@@ -31,6 +32,10 @@ type ServiceAnnouncementMessage struct {
 	tokenPrefixedMessage
 	Service string
 	Port    uint16
+}
+
+func (m *ServiceAnnouncementMessage) id() int32 {
+	return 0x00000000
 }
 
 func (m *ServiceAnnouncementMessage) readFrom(r io.Reader) (err error) {
@@ -63,6 +68,10 @@ type PingMessage struct {
 	Data   []byte
 }
 
+func (m *PingMessage) id() int32 {
+	return 0x00000001
+}
+
 func (m *PingMessage) readFrom(r io.Reader) (err error) {
 	if err = m.tokenPrefixedMessage.readFrom(r); err != nil {
 		return
@@ -70,7 +79,7 @@ func (m *PingMessage) readFrom(r io.Reader) (err error) {
 	if _, err = r.Read(m.Token2[:]); err != nil {
 		return
 	}
-	buf := make([]byte, 1024)
+	buf := make([]byte, 8)
 	n, err := r.Read(buf)
 	if err != nil {
 		return
@@ -92,6 +101,10 @@ func (m *PingMessage) writeTo(w io.Writer) (err error) {
 
 type EmptyMessage struct {
 	tokenPrefixedMessage
+}
+
+func (m *EmptyMessage) id() int32 {
+	return 0x00000002
 }
 
 // func (m *EmptyMessage) readFrom(r io.Reader) (err error) {
@@ -128,6 +141,10 @@ type DiscoveryMessage struct {
 	SoftwareName    string
 	SoftwareVersion string
 	Port            uint16
+}
+
+func (m *DiscoveryMessage) id() int32 {
+	return 0x61697244
 }
 
 func (m *DiscoveryMessage) readFrom(r io.Reader) (err error) {
@@ -174,12 +191,12 @@ func (m *DiscoveryMessage) writeTo(w io.Writer) (err error) {
 	return
 }
 
-var tcpMessageMap = map[int64]func() message{
+var tcpMessageMap = map[int32]func() message{
 	0x00000000: func() message { return new(ServiceAnnouncementMessage) },
 	0x00000001: func() message { return new(PingMessage) },
 	0x00000002: func() message { return new(EmptyMessage) },
 }
 
-var udpMessageMap = map[int64]func() message{
+var udpMessageMap = map[int32]func() message{
 	0x61697244 /* "airD" */ : func() message { return new(DiscoveryMessage) },
 }
