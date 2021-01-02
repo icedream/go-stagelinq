@@ -62,64 +62,45 @@ func (m *ServiceAnnouncementMessage) writeTo(w io.Writer) (err error) {
 	return
 }
 
-type PingMessage struct {
+type ReferenceMessage struct {
 	tokenPrefixedMessage
-	Token2 Token
-	Data   []byte
+	Token2    Token
+	Reference int64
 }
 
-func (m *PingMessage) id() int32 {
+func (m *ReferenceMessage) id() int32 {
 	return 0x00000001
 }
 
-func (m *PingMessage) readFrom(r io.Reader) (err error) {
+func (m *ReferenceMessage) readFrom(r io.Reader) (err error) {
 	if err = m.tokenPrefixedMessage.readFrom(r); err != nil {
 		return
 	}
 	if _, err = r.Read(m.Token2[:]); err != nil {
 		return
 	}
-	buf := make([]byte, 8)
-	n, err := r.Read(buf)
-	if err != nil {
-		return
-	}
-	m.Data = buf[0:n]
+	err = binary.Read(r, binary.BigEndian, &m.Reference)
 	return
 }
 
-func (m *PingMessage) writeTo(w io.Writer) (err error) {
+func (m *ReferenceMessage) writeTo(w io.Writer) (err error) {
 	if err = m.tokenPrefixedMessage.writeTo(w); err != nil {
 		return
 	}
 	if _, err = w.Write(m.Token2[:]); err != nil {
 		return
 	}
-	_, err = w.Write(m.Data)
+	err = binary.Write(w, binary.BigEndian, m.Reference)
 	return
 }
 
-type EmptyMessage struct {
+type ServicesRequestMessage struct {
 	tokenPrefixedMessage
 }
 
-func (m *EmptyMessage) id() int32 {
+func (m *ServicesRequestMessage) id() int32 {
 	return 0x00000002
 }
-
-// func (m *EmptyMessage) readFrom(r io.Reader) (err error) {
-// 	if err = m.tokenPrefixedMessage.readFrom(r); err != nil {
-// 		return
-// 	}
-// 	return
-// }
-
-// func (m *EmptyMessage) writeTo(w io.Writer) (err error) {
-// 	if err = m.tokenPrefixedMessage.writeTo(w); err != nil {
-// 		return
-// 	}
-// 	return
-// }
 
 // DiscovererMessageAction is the action taken by a device as part of StagelinQ device discovery.
 // Possible values are DiscovererHowdy or DiscovererExit.
@@ -193,8 +174,8 @@ func (m *DiscoveryMessage) writeTo(w io.Writer) (err error) {
 
 var tcpMessageMap = map[int32]func() message{
 	0x00000000: func() message { return new(ServiceAnnouncementMessage) },
-	0x00000001: func() message { return new(PingMessage) },
-	0x00000002: func() message { return new(EmptyMessage) },
+	0x00000001: func() message { return new(ReferenceMessage) },
+	0x00000002: func() message { return new(ServicesRequestMessage) },
 }
 
 var udpMessageMap = map[int32]func() message{
