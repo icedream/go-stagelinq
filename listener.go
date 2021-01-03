@@ -6,7 +6,6 @@ import (
 	"errors"
 	"math/rand"
 	"net"
-	"syscall"
 	"time"
 )
 
@@ -40,13 +39,6 @@ var stagelinqDiscoveryBroadcastAddress = &net.UDPAddr{
 }
 
 var magicBytes = []byte("airD")
-
-func setSocketControlForReusePort(network, address string, c syscall.RawConn) error {
-	return c.Control(func(fd uintptr) {
-		syscall.SetsockoptInt(syscall.Handle(fd), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
-		syscall.SetsockoptInt(syscall.Handle(fd), syscall.SOL_SOCKET, syscall.SO_BROADCAST, 1)
-	})
-}
 
 // Listener listens on UDP port 51337 for StagelinQ devices and announces itself in the same way.
 type Listener struct {
