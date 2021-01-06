@@ -58,9 +58,6 @@ func (l *Listener) Token() Token {
 
 // Close shuts down the listener.
 func (l *Listener) Close() error {
-	// Send two exit messages just to make sure (apps I tested seem to do that)
-	l.announce(discovererExit)
-	l.announce(discovererExit)
 	return l.packetConn.Close()
 }
 
@@ -68,6 +65,12 @@ func (l *Listener) Close() error {
 // This function should be called before actually listening in for devices to allow them to pick up our token for communication immediately.
 func (l *Listener) Announce() error {
 	return l.announce(discovererHowdy)
+}
+
+// Unannounce announces this StagelinQ listener leaving from the network.
+// Call this before closing the listener!
+func (l *Listener) Unannounce() error {
+	return l.announce(discovererExit)
 }
 
 func (l *Listener) announce(action discovererMessageAction) (err error) {

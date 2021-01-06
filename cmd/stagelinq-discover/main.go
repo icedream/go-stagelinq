@@ -23,8 +23,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer listener.Close()
 
 	listener.Announce()
+	defer listener.Unannounce()
 
 	deadline := time.After(timeout)
 	foundDevices := []*stagelinq.Device{}
