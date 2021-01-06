@@ -7,17 +7,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var testToken = [16]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
+var testToken = Token{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
 
-func Test_DeviceConn_Read(t *testing.T) {
+func Test_MessageConnection_Read(t *testing.T) {
 	testMessages := []struct {
 		Message message
 		Bytes   []byte
 	}{
 		{
-			Message: &ServiceAnnouncementMessage{
+			Message: &serviceAnnouncementMessage{
 				tokenPrefixedMessage: tokenPrefixedMessage{
-					Token: [16]byte{0xf4, 0x05, 0xdc, 0x14, 0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c, 0x49, 0x33, 0x52, 0x76},
+					Token: Token{0xf4, 0x05, 0xdc, 0x14, 0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c, 0x49, 0x33, 0x52, 0x76},
 				},
 				Service: "StateMap",
 				Port:    0xb1d7,
@@ -38,9 +38,9 @@ func Test_DeviceConn_Read(t *testing.T) {
 			},
 		},
 		{
-			Message: &ReferenceMessage{
+			Message: &referenceMessage{
 				tokenPrefixedMessage: tokenPrefixedMessage{
-					Token: [16]byte{0xf4, 0x05, 0xdc, 0x14, 0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c, 0x49, 0x33, 0x52, 0x76},
+					Token: Token{0xf4, 0x05, 0xdc, 0x14, 0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c, 0x49, 0x33, 0x52, 0x76},
 				},
 				Reference: 0x000009ed4f310604,
 			},
@@ -60,9 +60,9 @@ func Test_DeviceConn_Read(t *testing.T) {
 			},
 		},
 		{
-			Message: &ServicesRequestMessage{
+			Message: &servicesRequestMessage{
 				tokenPrefixedMessage: tokenPrefixedMessage{
-					Token: [16]byte{0xf4, 0x05, 0xdc, 0x14, 0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c, 0x49, 0x33, 0x52, 0x76},
+					Token: Token{0xf4, 0x05, 0xdc, 0x14, 0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c, 0x49, 0x33, 0x52, 0x76},
 				},
 			},
 			Bytes: []byte{
@@ -73,9 +73,9 @@ func Test_DeviceConn_Read(t *testing.T) {
 			},
 		},
 		{
-			Message: &ServiceAnnouncementMessage{
+			Message: &serviceAnnouncementMessage{
 				tokenPrefixedMessage: tokenPrefixedMessage{
-					Token: [16]byte{0x52, 0x3e, 0x67, 0x9d, 0xa4, 0x18, 0x4d, 0x1e, 0x83, 0xd0, 0xc7, 0x52, 0xcf, 0xca, 0x8f, 0xf7},
+					Token: Token{0x52, 0x3e, 0x67, 0x9d, 0xa4, 0x18, 0x4d, 0x1e, 0x83, 0xd0, 0xc7, 0x52, 0xcf, 0xca, 0x8f, 0xf7},
 				},
 				Service: "DirectoryService",
 				Port:    0xe190,
@@ -99,9 +99,9 @@ func Test_DeviceConn_Read(t *testing.T) {
 			},
 		},
 		{
-			Message: &ServicesRequestMessage{
+			Message: &servicesRequestMessage{
 				tokenPrefixedMessage: tokenPrefixedMessage{
-					Token: [16]byte{0x52, 0x3e, 0x67, 0x9d, 0xa4, 0x18, 0x4d, 0x1e, 0x83, 0xd0, 0xc7, 0x52, 0xcf, 0xca, 0x8f, 0xf7},
+					Token: Token{0x52, 0x3e, 0x67, 0x9d, 0xa4, 0x18, 0x4d, 0x1e, 0x83, 0xd0, 0xc7, 0x52, 0xcf, 0xca, 0x8f, 0xf7},
 				},
 			},
 			Bytes: []byte{
@@ -116,8 +116,8 @@ func Test_DeviceConn_Read(t *testing.T) {
 			},
 		},
 		{
-			Message: &ReferenceMessage{
-				Token2:    [16]byte{0x52, 0x3e, 0x67, 0x9d, 0xa4, 0x18, 0x4d, 0x1e, 0x83, 0xd0, 0xc7, 0x52, 0xcf, 0xca, 0x8f, 0xf7},
+			Message: &referenceMessage{
+				Token2:    Token{0x52, 0x3e, 0x67, 0x9d, 0xa4, 0x18, 0x4d, 0x1e, 0x83, 0xd0, 0xc7, 0x52, 0xcf, 0xca, 0x8f, 0xf7},
 				Reference: 0x000009ed4f310604,
 			},
 			Bytes: []byte{
@@ -161,17 +161,23 @@ func Test_DeviceConn_Read(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to accept test connection: %s", err.Error())
 	}
-	deviceConn := newDeviceConn(conn)
+
+	messageObjects := []message{}
+	for _, testMessage := range testMessages {
+		messageObjects = append(messageObjects, testMessage.Message)
+	}
+	msgConn := newMessageConnection(conn, newDeviceConnMessageSet(messageObjects))
+
 	for _, expectedMessage := range testMessages {
-		message, err := deviceConn.ReadMessage()
+		message, err := msgConn.ReadMessage()
 		require.Nil(t, err)
 		require.Equal(t, expectedMessage.Message, message)
 	}
 }
 
-func Test_DeviceConn(t *testing.T) {
+func Test_MessageConnection(t *testing.T) {
 	testMessages := []message{
-		&ServiceAnnouncementMessage{
+		&serviceAnnouncementMessage{
 			tokenPrefixedMessage: tokenPrefixedMessage{testToken},
 			Service:              "test",
 			Port:                 0x1234,
@@ -190,9 +196,11 @@ func Test_DeviceConn(t *testing.T) {
 			t.Fatalf("Failed to set up test connection: %s", err.Error())
 			return
 		}
-		deviceConn := newDeviceConn(conn)
+
+		msgConn := newMessageConnection(conn, newDeviceConnMessageSet(testMessages))
+
 		for _, testMessage := range testMessages {
-			err := deviceConn.WriteMessage(testMessage)
+			err := msgConn.WriteMessage(testMessage)
 			require.Nil(t, err)
 		}
 	}()
@@ -201,9 +209,9 @@ func Test_DeviceConn(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to accept test connection: %s", err.Error())
 	}
-	deviceConn := newDeviceConn(conn)
+	msgConn := newMessageConnection(conn, newDeviceConnMessageSet(testMessages))
 	for _, expectedMessage := range testMessages {
-		message, err := deviceConn.ReadMessage()
+		message, err := msgConn.ReadMessage()
 		require.Nil(t, err)
 		require.Equal(t, expectedMessage, message)
 	}

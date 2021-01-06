@@ -46,25 +46,33 @@ type Listener struct {
 	softwareVersion string
 	name            string
 	packetConn      net.PacketConn
-	token           [16]byte
-	timeout         time.Duration
+	token           Token
 	port            uint16
+}
+
+// Token returns our token that is being announced to the StagelinQ network.
+// Use this token for further communication with services on other devices.
+func (l *Listener) Token() Token {
+	return l.token
 }
 
 // Close shuts down the listener.
 func (l *Listener) Close() error {
+	// Send two exit messages just to make sure (apps I tested seem to do that)
+	l.announce(discovererExit)
+	l.announce(discovererExit)
 	return l.packetConn.Close()
 }
 
 // Announce announces this StagelinQ listener to the network.
 // This function should be called before actually listening in for devices to allow them to pick up our token for communication immediately.
 func (l *Listener) Announce() error {
-	return l.announce(DiscovererHowdy)
+	return l.announce(discovererHowdy)
 }
 
-func (l *Listener) announce(action DiscovererMessageAction) (err error) {
+func (l *Listener) announce(action discovererMessageAction) (err error) {
 	// TODO - optimization: cache the built message because it will be sent repeatedly?
-	m := &DiscoveryMessage{
+	m := &discoveryMessage{
 		Source:          l.name,
 		SoftwareName:    l.softwareName,
 		SoftwareVersion: l.softwareVersion,
@@ -85,14 +93,14 @@ func (l *Listener) announce(action DiscovererMessageAction) (err error) {
 }
 
 // Discover listens for any StagelinQ devices announcing to the network.
-// If no device is found within the configured timeout or any non-StagelinQ message has been received, nil is returned for the device.
+// If no device is found within the given timeout or any non-StagelinQ message has been received, nil is returned for the device.
 // If a device has been discovered before, the returned device object is not going to be the same as when the device was previously discovered.
 // Use device.IsEqual for such comparison.
-func (l *Listener) Discover() (device *Device, deviceState DeviceState, err error) {
+func (l *Listener) Discover(timeout time.Duration) (device *Device, deviceState DeviceState, err error) {
 	b := make([]byte, 8*1024)
 
-	if l.timeout != 0 {
-		l.packetConn.SetReadDeadline(time.Now().Add(l.timeout))
+	if timeout != 0 {
+		l.packetConn.SetReadDeadline(time.Now().Add(timeout))
 	}
 
 	n, src, err := l.packetConn.ReadFrom(b)
@@ -106,15 +114,9 @@ func (l *Listener) Discover() (device *Device, deviceState DeviceState, err erro
 		return
 	}
 
-	// do first bytes match expected magic bytes?
-	if !bytes.Equal(b[0:4], magicBytes) {
-		err = ErrInvalidMessageReceived
-		return
-	}
-
 	// decode message
-	r := bytes.NewReader(b[4:n])
-	m := new(DiscoveryMessage)
+	r := bytes.NewReader(b)
+	m := new(discoveryMessage)
 	if err = m.readFrom(r); err != nil {
 		return
 	}
@@ -122,9 +124,9 @@ func (l *Listener) Discover() (device *Device, deviceState DeviceState, err erro
 	device = newDeviceFromDiscovery(src.(*net.UDPAddr), m)
 
 	switch m.Action {
-	case DiscovererExit:
+	case discovererExit:
 		deviceState = DeviceLeaving
-	case DiscovererHowdy:
+	case discovererHowdy:
 		deviceState = DevicePresent
 	default:
 		err = ErrInvalidDiscovererActionReceived
@@ -139,7 +141,7 @@ func Listen() (listener *Listener, err error) {
 	return ListenWithConfiguration(nil)
 }
 
-var zeroToken = [16]byte{}
+var zeroToken = Token{}
 
 // ListenWithConfiguration sets up a StagelinQ listener with the given configuration.
 func ListenWithConfiguration(listenerConfig *ListenerConfiguration) (listener *Listener, err error) {
@@ -176,7 +178,6 @@ func ListenWithConfiguration(listenerConfig *ListenerConfiguration) (listener *L
 		packetConn:      packetConn,
 		softwareName:    listenerConfig.SoftwareName,
 		softwareVersion: listenerConfig.SoftwareVersion,
-		timeout:         listenerConfig.DiscoveryTimeout,
 		token:           token,
 	}
 

@@ -25,5 +25,5 @@ type ListenerConfiguration struct {
 	SoftwareVersion string
 
 	// Token is used as part of announcements and main data communication. It is currently recommended to leave this empty.
-	Token [16]byte
+	Token Token
 }
