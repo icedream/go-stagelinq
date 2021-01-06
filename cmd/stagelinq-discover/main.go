@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"git.icedream.tech/icedream/stagelinq-receiver"
+	"github.com/icedream/go-stagelinq"
 )
 
 const (

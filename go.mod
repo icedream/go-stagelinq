@@ -1,4 +1,4 @@
-module git.icedream.tech/icedream/stagelinq-receiver
+module github.com/icedream/go-stagelinq
 
 go 1.15
 
