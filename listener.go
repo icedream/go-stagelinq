@@ -106,37 +106,55 @@ func (l *Listener) Discover(timeout time.Duration) (device *Device, deviceState 
 		l.packetConn.SetReadDeadline(time.Now().Add(timeout))
 	}
 
-	n, src, err := l.packetConn.ReadFrom(b)
-	if err != nil {
+readLoop:
+	for {
+		var n int
+		var src net.Addr
+		n, src, err = l.packetConn.ReadFrom(b)
+		if err != nil {
+			if nerr, ok := err.(net.Error); ok && nerr.Timeout() {
+				// ignore i/o timeout since we set the timeout ourself
+				err = nil
+			}
+			return
+		}
+
+		// message smaller than expected magic bytes?
+		if n < 4 {
+			err = ErrTooShortDiscoveryMessageReceived
+			return
+		}
+
+		// decode message
+		r := bytes.NewReader(b)
+		m := new(discoveryMessage)
+		if err = m.readFrom(r); err != nil {
+			return
+		}
+
+		device = newDeviceFromDiscovery(src.(*net.UDPAddr), m)
+
+		// is this just ourself?
+		if bytes.Equal(device.token[:], l.token[:]) &&
+			device.Name == l.name &&
+			device.SoftwareName == l.softwareName &&
+			device.SoftwareVersion == l.softwareVersion {
+			// ignore
+			continue readLoop
+		}
+
+		switch m.Action {
+		case discovererExit:
+			deviceState = DeviceLeaving
+		case discovererHowdy:
+			deviceState = DevicePresent
+		default:
+			err = ErrInvalidDiscovererActionReceived
+			return
+		}
+
 		return
 	}
-
-	// message smaller than expected magic bytes?
-	if n < 4 {
-		err = ErrTooShortDiscoveryMessageReceived
-		return
-	}
-
-	// decode message
-	r := bytes.NewReader(b)
-	m := new(discoveryMessage)
-	if err = m.readFrom(r); err != nil {
-		return
-	}
-
-	device = newDeviceFromDiscovery(src.(*net.UDPAddr), m)
-
-	switch m.Action {
-	case discovererExit:
-		deviceState = DeviceLeaving
-	case discovererHowdy:
-		deviceState = DevicePresent
-	default:
-		err = ErrInvalidDiscovererActionReceived
-		return
-	}
-
-	return
 }
 
 // Listen sets up a StagelinQ listener.
