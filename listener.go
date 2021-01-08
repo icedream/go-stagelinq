@@ -31,14 +31,54 @@ var ErrInvalidMessageReceived = errors.New("invalid message received")
 var ErrInvalidDiscovererActionReceived = errors.New("invalid discoverer action received")
 
 const stagelinqDiscoveryNetwork = "udp"
-const stagelinqDiscoveryAddressString = "0.0.0.0:51337"
-
-var stagelinqDiscoveryBroadcastAddress = &net.UDPAddr{
-	IP:   net.IPv4(255, 255, 255, 255),
-	Port: 51337,
-}
+const stagelinqDiscoveryAddressString = ":51337"
 
 var magicBytes = []byte("airD")
+
+func makeStagelinqDiscoveryBroadcastAddress(ip net.IP) *net.UDPAddr {
+	return &net.UDPAddr{
+		IP:   ip,
+		Port: 51337,
+	}
+}
+
+func getAllBroadcastIPs() (retval []net.IP, err error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return
+	}
+
+	ips := []net.IP{}
+addrsLoop:
+	for _, addr := range addrs {
+		var ip net.IP
+		var mask net.IPMask
+		switch v := addr.(type) {
+		case *net.IPAddr:
+			ip = v.IP
+			mask = v.IP.DefaultMask()
+		case *net.IPNet:
+			ip = v.IP
+			mask = v.Mask
+		}
+		if ip == nil {
+			continue
+		}
+
+		// prevent addresses from being added multiple times (for example zeroconf)
+		bip := makeBroadcastIP(ip, mask)
+		for _, alreadyAddedIP := range ips {
+			if alreadyAddedIP.Equal(bip) {
+				continue addrsLoop
+			}
+		}
+
+		ips = append(ips, bip)
+	}
+
+	retval = ips
+	return
+}
 
 // Listener listens on UDP port 51337 for StagelinQ devices and announces itself in the same way.
 type Listener struct {
@@ -90,8 +130,20 @@ func (l *Listener) announce(action discovererMessageAction) (err error) {
 	if err != nil {
 		return
 	}
+	finalBytes := b.Bytes()
+	ips, err := getAllBroadcastIPs()
+	if err != nil {
+		return
+	}
+	for _, ip := range ips {
+		addr := makeStagelinqDiscoveryBroadcastAddress(ip)
+		packetConn, err := net.DialUDP("udp", nil, addr)
+		if err == nil {
+			_, _ = packetConn.Write(finalBytes)
+			packetConn.Close()
+		}
+	}
 
-	_, err = l.packetConn.WriteTo(b.Bytes(), stagelinqDiscoveryBroadcastAddress)
 	return
 }
 
