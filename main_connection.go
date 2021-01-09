@@ -16,8 +16,8 @@ type Service struct {
 type MainConnection struct {
 	lock sync.Mutex
 
-	token Token
-	*messageConnection
+	token   Token
+	msgConn *messageConnection
 
 	offeredServices []*Service
 
@@ -40,10 +40,10 @@ func newMainConnection(conn net.Conn, token Token, targetToken Token, offeredSer
 	msgConn := newMessageConnection(conn, mainConnectionMessageSet)
 
 	mainConn := &MainConnection{
-		token:             token,
-		messageConnection: msgConn,
-		errorC:            make(chan error, 1),
-		offeredServices:   offeredServices,
+		token:           token,
+		msgConn:         msgConn,
+		errorC:          make(chan error, 1),
+		offeredServices: offeredServices,
 	}
 
 	go func() {
@@ -54,7 +54,7 @@ func newMainConnection(conn net.Conn, token Token, targetToken Token, offeredSer
 			mainConn.lock.Lock()
 			ref := mainConn.reference
 			mainConn.lock.Unlock()
-			if err = mainConn.messageConnection.WriteMessage(&referenceMessage{
+			if err = mainConn.msgConn.WriteMessage(&referenceMessage{
 				tokenPrefixedMessage: tokenPrefixedMessage{
 					Token: mainConn.token,
 				},
@@ -80,7 +80,7 @@ func newMainConnection(conn net.Conn, token Token, targetToken Token, offeredSer
 		}()
 		for {
 			var msg message
-			msg, err = mainConn.ReadMessage()
+			msg, err = mainConn.msgConn.ReadMessage()
 			if err != nil {
 				return
 			}
@@ -124,7 +124,7 @@ func newMainConnection(conn net.Conn, token Token, targetToken Token, offeredSer
 
 // Close terminates the connection.
 func (conn *MainConnection) Close() (err error) {
-	return conn.conn.Close()
+	return conn.msgConn.conn.Close()
 }
 
 // RequestServices asks the device to return other TCP ports it is listening on and which services it provides on them.
@@ -156,7 +156,7 @@ func (conn *MainConnection) RequestServices() (retval []*Service, err error) {
 }
 
 func (conn *MainConnection) requestServices() (err error) {
-	if err = conn.messageConnection.WriteMessage(&servicesRequestMessage{
+	if err = conn.msgConn.WriteMessage(&servicesRequestMessage{
 		tokenPrefixedMessage: tokenPrefixedMessage{
 			Token: conn.token,
 		},
@@ -168,7 +168,7 @@ func (conn *MainConnection) requestServices() (err error) {
 
 // announceService tells the device about a service we provide.
 func (conn *MainConnection) announceService(name string, port uint16) error {
-	return conn.messageConnection.WriteMessage(&serviceAnnouncementMessage{
+	return conn.msgConn.WriteMessage(&serviceAnnouncementMessage{
 		tokenPrefixedMessage: tokenPrefixedMessage{
 			Token: conn.token,
 		},
