@@ -2,6 +2,10 @@
 
 This library implements Denon's StagelinQ protocol, allowing any Go application to talk to devices that are compatible with this protocol on the network.
 
+An example application is provided that, if running successfully, will output information like this:
+
+![Screenshot of the example CLI](docs/screenshot.png)
+
 ## Features
 
 - Automatically discover StagelinQ-compatible devices on the network
