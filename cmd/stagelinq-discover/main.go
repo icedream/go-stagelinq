@@ -130,43 +130,46 @@ discoveryLoop:
 				services, err := deviceConn.RequestServices()
 				if err != nil {
 					log.Printf("WARNING: %s", err.Error())
-				} else {
-					for _, service := range services {
-						log.Printf("\toffers %s at port %d", service.Name, service.Port)
-						switch service.Name {
-						case "StateMap":
-							stateMapTCPConn, err := device.Dial(service.Port)
-							defer stateMapTCPConn.Close()
-							if err != nil {
-								log.Printf("WARNING: %s", err.Error())
-							} else {
-								stateMapConn, err := stagelinq.NewStateMapConnection(stateMapTCPConn, listener.Token())
-								if err != nil {
-									log.Printf("WARNING: %s", err.Error())
-								} else {
-									m := makeStateMap()
-									for _, stateValue := range stateValues {
-										stateMapConn.Subscribe(stateValue)
-									}
-									for state := range stateMapConn.StateC() {
-										log.Printf("\t%s = %s", state.Name, state.Value)
-										m[state.Name] = true
-										if allStateValuesReceived(m) {
-											break
-										}
-									}
-									select {
-									case err := <-stateMapConn.ErrorC():
-										log.Printf("WARNING: %s", err.Error())
-									default:
-									}
-									stateMapTCPConn.Close()
-								}
+					continue
+				}
+
+				for _, service := range services {
+					log.Printf("\toffers %s at port %d", service.Name, service.Port)
+					switch service.Name {
+					case "StateMap":
+						stateMapTCPConn, err := device.Dial(service.Port)
+						defer stateMapTCPConn.Close()
+						if err != nil {
+							log.Printf("WARNING: %s", err.Error())
+							continue
+						}
+						stateMapConn, err := stagelinq.NewStateMapConnection(stateMapTCPConn, listener.Token())
+						if err != nil {
+							log.Printf("WARNING: %s", err.Error())
+							continue
+						}
+
+						m := makeStateMap()
+						for _, stateValue := range stateValues {
+							stateMapConn.Subscribe(stateValue)
+						}
+						for state := range stateMapConn.StateC() {
+							log.Printf("\t%s = %s", state.Name, state.Value)
+							m[state.Name] = true
+							if allStateValuesReceived(m) {
+								break
 							}
 						}
+						select {
+						case err := <-stateMapConn.ErrorC():
+							log.Printf("WARNING: %s", err.Error())
+						default:
+						}
+						stateMapTCPConn.Close()
 					}
-					log.Println("\tend of list of device data services")
 				}
+
+				log.Println("\tend of list of device data services")
 			}
 		}
 	}
