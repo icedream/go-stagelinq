@@ -1,5 +1,7 @@
 # StagelinQ for Golang
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/icedream/go-stagelinq.svg)](https://pkg.go.dev/github.com/icedream/go-stagelinq)
+
 This library implements Denon's StagelinQ protocol, allowing any Go application to talk to devices that are compatible with this protocol on the network.
 
 An example application is provided that, if running successfully, will output information like this:
