@@ -25,11 +25,9 @@ type Device struct {
 	SoftwareVersion string
 }
 
-// dial starts a TCP connection with the device.
-func (device *Device) dial() (conn net.Conn, err error) {
+// Dial starts a TCP connection with the device on the given port.
+func (device *Device) Dial(port uint16) (conn net.Conn, err error) {
 	ip := device.IP
-	port := device.port
-
 	conn, err = net.DialTCP("tcp", nil, &net.TCPAddr{
 		IP:   ip,
 		Port: int(port),
@@ -42,7 +40,7 @@ func (device *Device) dial() (conn net.Conn, err error) {
 // You need to pass the StagelinQ token announced for your own device.
 // You also need to pass services you want to provide; if you don't have any, pass an empty array.
 func (device *Device) Connect(token Token, offeredServices []*Service) (conn *MainConnection, err error) {
-	tcpConn, err := device.dial()
+	tcpConn, err := device.Dial(device.port)
 	if err != nil {
 		return
 	}
