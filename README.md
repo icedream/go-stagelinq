@@ -2,6 +2,11 @@
 
 This library implements Denon's StagelinQ protocol, allowing any Go application to talk to devices that are compatible with this protocol on the network.
 
+## Features
+
+- Automatically discover StagelinQ-compatible devices on the network
+- Access state map information such as currently playing track metadata, fader values, etc.
+
 ## Stability
 
 The code of this project is an **experimental** reverse-engineering effort and therefor can behave erratically in untested cases. Currently, this code only has been practically tested with the Denon Prime 4.
