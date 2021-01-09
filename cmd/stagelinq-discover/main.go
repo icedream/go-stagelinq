@@ -103,6 +103,9 @@ discoveryLoop:
 				log.Printf("WARNING: %s", err.Error())
 				continue discoveryLoop
 			}
+			if device == nil {
+				continue
+			}
 			// ignore device leaving messages since we do a one-off list
 			if deviceState != stagelinq.DevicePresent {
 				continue discoveryLoop
