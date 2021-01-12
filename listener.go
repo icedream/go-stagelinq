@@ -6,6 +6,7 @@ import (
 	"errors"
 	"math/rand"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -82,12 +83,14 @@ addrsLoop:
 
 // Listener listens on UDP port 51337 for StagelinQ devices and announces itself in the same way.
 type Listener struct {
-	softwareName    string
-	softwareVersion string
-	name            string
-	packetConn      net.PacketConn
-	token           Token
-	port            uint16
+	softwareName      string
+	softwareVersion   string
+	name              string
+	packetConn        net.PacketConn
+	token             Token
+	port              uint16
+	shutdownCond      *sync.Cond
+	shutdownWaitGroup sync.WaitGroup
 }
 
 // Token returns our token that is being announced to the StagelinQ network.
@@ -98,6 +101,10 @@ func (l *Listener) Token() Token {
 
 // Close shuts down the listener.
 func (l *Listener) Close() error {
+	// notify goroutines we are going to shut down and wait for them to finish
+	l.shutdownCond.Broadcast()
+	l.shutdownWaitGroup.Wait()
+
 	return l.packetConn.Close()
 }
 
@@ -105,6 +112,47 @@ func (l *Listener) Close() error {
 // This function should be called before actually listening in for devices to allow them to pick up our token for communication immediately.
 func (l *Listener) Announce() error {
 	return l.announce(discovererHowdy)
+}
+
+// AnnounceEvery will start a goroutine which calls the Announce function at given interval.
+// It will automatically terminate once this listener is shut down.
+// A recommended value for the interval is 1 second.
+func (l *Listener) AnnounceEvery(interval time.Duration) {
+	shutdownC := make(chan interface{}, 1)
+
+	// make Close() wait for us
+	l.shutdownWaitGroup.Add(1)
+
+	// listen for shutdown signal broadcast, forward it to our own channel
+	go func() {
+		l.shutdownCond.L.Lock()
+		defer l.shutdownCond.L.Unlock()
+		l.shutdownCond.Wait()
+		shutdownC <- nil
+	}()
+
+	go func() {
+		defer l.shutdownWaitGroup.Done()
+
+		// timestamp for when to send next announcement
+		ticker := time.NewTicker(interval)
+
+		// do first announcement immediately
+		l.Announce()
+		defer l.Unannounce()
+
+		for {
+			select {
+			case <-ticker.C: // next interval - announcement
+				if err := l.Announce(); checkErrIsNetClosed(err) {
+					return
+				}
+				// NOTE - Considering AnnounceEvery is a fire-and-forget command we're ignoring other errors here for now. Not sure how to properly handle them otherwise atm.
+			case <-shutdownC:
+				return
+			}
+		}
+	}()
 }
 
 // Unannounce announces this StagelinQ listener leaving from the network.
@@ -252,6 +300,7 @@ func ListenWithConfiguration(listenerConfig *ListenerConfiguration) (listener *L
 		softwareName:    listenerConfig.SoftwareName,
 		softwareVersion: listenerConfig.SoftwareVersion,
 		token:           token,
+		shutdownCond:    sync.NewCond(&sync.Mutex{}),
 	}
 
 	return

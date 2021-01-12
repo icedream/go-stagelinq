@@ -84,8 +84,7 @@ func main() {
 	}
 	defer listener.Close()
 
-	listener.Announce()
-	defer listener.Unannounce()
+	listener.AnnounceEvery(time.Second)
 
 	deadline := time.After(timeout)
 	foundDevices := []*stagelinq.Device{}
