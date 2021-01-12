@@ -3,5 +3,5 @@
 package stagelinq
 
 func checkErrIsNetClosed(err error) bool {
-	return err.Error() == "use of closed network connection"
+	return err != nil && err.Error() == "use of closed network connection"
 }
