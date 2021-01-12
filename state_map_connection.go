@@ -3,12 +3,13 @@ package stagelinq
 import (
 	"encoding/json"
 	"net"
+	"strings"
 )
 
 // State represents a received state value.
 type State struct {
 	Name  string
-	Value json.RawMessage
+	Value map[string]interface{}
 }
 
 // StateMapConnection provides functionality to communicate with the StateMap data source.
@@ -64,10 +65,14 @@ func NewStateMapConnection(conn net.Conn, token Token) (smc *StateMapConnection,
 
 			switch v := msg.(type) {
 			case *stateEmitMessage:
-				stateC <- &State{
-					Name:  v.Name,
-					Value: json.RawMessage(v.JSON),
+				state := &State{
+					Name: v.Name,
 				}
+				err = json.NewDecoder(strings.NewReader(v.JSON)).Decode(&state.Value)
+				if err != nil {
+					return
+				}
+				stateC <- state
 			}
 		}
 	}()
