@@ -19,6 +19,19 @@ The code of this project is an **experimental** reverse-engineering effort and t
 
 If you have any other Denon devices you would like to test this library against, please do! Even better, you can let me know if you run into any bugs by reporting them [as an issue ticket](https://github.com/icedream/go-stagelinq/issues).
 
+## Building
+
+Make sure you have a recent version of Go with module support enabled, then you can install the `stagelinq-discover` example binary by one of two means:
+
+- `git clone` this repository and run `go build -v ./cmd/stagelinq-discover` to build the binary.
+- Run `go install github.com/icedream/go-stagelinq/cmd/stagelinq-discover` to install the binary to your `$GOPATH`.
+
+## Usage
+
+To use this library, import `"github.com/icedream/go-stagelinq"` in your Go project. This will give you access to the `stagelinq` library namespace.
+
+[Go code documentation is available](https://pkg.go.dev/github.com/icedream/go-stagelinq).
+
 ## Testing
 
 This project uses Go tests, they can be run with this command:
