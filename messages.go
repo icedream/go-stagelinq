@@ -383,6 +383,305 @@ func (m *stateEmitMessage) writeTo(w io.Writer) (err error) {
 	return
 }
 
+// BeatInfo
+
+var beatInfoStartStreamMagicBytes = []byte{0x0, 0x0, 0x0, 0x0}
+
+type beatInfoStartStreamMessage struct {
+}
+
+func (m *beatInfoStartStreamMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
+	// peek length bytes and magic bytes
+	b, err := r.Peek(4 + 4)
+	if err != nil {
+		return
+	}
+	// check magic bytes
+	if ok = bytes.Equal(b[4:8], beatInfoStartStreamMagicBytes); !ok {
+		return
+	}
+	return
+}
+
+func (m *beatInfoStartStreamMessage) readFrom(r io.Reader) (err error) {
+	// read expected message length
+	var expectedLength uint32
+	if err = binary.Read(r, binary.BigEndian, &expectedLength); err != nil {
+		return
+	}
+
+	// set up buffer to write message into
+	msgBytes := make([]byte, int(expectedLength))
+	msgBytesOffset := 0
+	for msgBytesOffset < int(expectedLength) {
+		var n int
+		if n, err = r.Read(msgBytes[msgBytesOffset:]); err != nil {
+			return
+		}
+		msgBytesOffset += n
+	}
+	msgReader := bytes.NewReader(msgBytes)
+
+	// read beatInfoStartStream magic bytes
+	magicBytes := make([]byte, 4)
+	if _, err = msgReader.Read(magicBytes); err != nil {
+		return
+	}
+	if !bytes.Equal(magicBytes, beatInfoStartStreamMagicBytes) {
+		return errors.New("invalid magic bytes")
+	}
+
+	return
+}
+
+func (m *beatInfoStartStreamMessage) writeTo(w io.Writer) (err error) {
+	buf := new(bytes.Buffer)
+
+	payload_len := len(beatInfoStartStreamMagicBytes)
+	if err = binary.Write(buf, binary.BigEndian, uint32(payload_len)); err != nil {
+		return
+	}
+
+	// write BeatInfo "start stream" magic bytes
+	if _, err = buf.Write(beatInfoStartStreamMagicBytes); err != nil {
+		return
+	}
+
+	// send actual message over wire
+	_, err = w.Write(buf.Bytes())
+	return
+}
+
+var beatInfoStopStreamMagicBytes = []byte{0x0, 0x0, 0x0, 0x1}
+
+type beatInfoStopStreamMessage struct {
+}
+
+func (m *beatInfoStopStreamMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
+	// peek length bytes and magic bytes
+	b, err := r.Peek(4 + 4)
+	if err != nil {
+		return
+	}
+	// check magic bytes
+	if ok = bytes.Equal(b[4:8], beatInfoStopStreamMagicBytes); !ok {
+		return
+	}
+	return
+}
+
+func (m *beatInfoStopStreamMessage) readFrom(r io.Reader) (err error) {
+	// read expected message length
+	var expectedLength uint32
+	if err = binary.Read(r, binary.BigEndian, &expectedLength); err != nil {
+		return
+	}
+
+	// set up buffer to write message into
+	msgBytes := make([]byte, int(expectedLength))
+	msgBytesOffset := 0
+	for msgBytesOffset < int(expectedLength) {
+		var n int
+		if n, err = r.Read(msgBytes[msgBytesOffset:]); err != nil {
+			return
+		}
+		msgBytesOffset += n
+	}
+	msgReader := bytes.NewReader(msgBytes)
+
+	// read beatInfoStopStream magic bytes
+	magicBytes := make([]byte, 4)
+	if _, err = msgReader.Read(magicBytes); err != nil {
+		return
+	}
+	if !bytes.Equal(magicBytes, beatInfoStopStreamMagicBytes) {
+		return errors.New("invalid magic bytes")
+	}
+
+	return
+}
+
+func (m *beatInfoStopStreamMessage) writeTo(w io.Writer) (err error) {
+	buf := new(bytes.Buffer)
+
+	payload_len := len(beatInfoStopStreamMagicBytes)
+	if err = binary.Write(buf, binary.BigEndian, uint32(payload_len)); err != nil {
+		return
+	}
+
+	// write BeatInfo "stop stream" magic bytes
+	if _, err = buf.Write(beatInfoStopStreamMagicBytes); err != nil {
+		return
+	}
+
+	// send actual message over wire
+	_, err = w.Write(buf.Bytes())
+	return
+}
+
+var beatEmitMagicBytes = []byte{0x0, 0x0, 0x0, 0x2}
+
+type PlayerInfo struct {
+	Beat       float64
+	TotalBeats float64
+	Bpm        float64
+}
+
+type beatEmitMessage struct {
+	//Length uint32
+	//Magic []byte = {0x00,0x00,0x00,0x02}
+	Clock     uint64
+	Players   []PlayerInfo
+	Timelines []float64
+}
+
+func (m *beatEmitMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
+	// peek length bytes and magic bytes
+	b, err := r.Peek(4 + 4)
+	if err != nil {
+		return
+	}
+	// check magic bytes
+	if ok = bytes.Equal(b[4:8], beatEmitMagicBytes); !ok {
+		return
+	}
+	return
+}
+
+func (m *beatEmitMessage) readFrom(r io.Reader) (err error) {
+	// read expected message length
+	var expectedLength uint32
+	if err = binary.Read(r, binary.BigEndian, &expectedLength); err != nil {
+		return
+	}
+
+	// set up buffer to write message into
+	msgBytes := make([]byte, int(expectedLength))
+	msgBytesOffset := 0
+	for msgBytesOffset < int(expectedLength) {
+		var n int
+		if n, err = r.Read(msgBytes[msgBytesOffset:]); err != nil {
+			return
+		}
+		msgBytesOffset += n
+	}
+	msgReader := bytes.NewReader(msgBytes)
+
+	// read beatEmit magic bytes
+	magicBytes := make([]byte, 4)
+	if _, err = msgReader.Read(magicBytes); err != nil {
+		return
+	}
+	if !bytes.Equal(magicBytes, beatEmitMagicBytes) {
+		err = errors.New("invalid magic bytes")
+		return
+	}
+
+	// read clock value
+	if err = binary.Read(msgReader, binary.BigEndian, &m.Clock); err != nil {
+		return
+	}
+
+	// read expected player records
+	var expectedRecords uint32
+	if err = binary.Read(msgReader, binary.BigEndian, &expectedRecords); err != nil {
+		return
+	}
+
+	// bounds check
+	// each playerInfo record is 24 bytes
+	if msgReader.Len() < int(expectedRecords)*24 {
+		err = errors.New("unknown packet format")
+	}
+
+	// loop through players records
+	for i := 0; i < int(expectedRecords); i++ {
+		var p PlayerInfo
+		if err = binary.Read(msgReader, binary.BigEndian, &p.Beat); err != nil {
+			return
+		}
+		if err = binary.Read(msgReader, binary.BigEndian, &p.TotalBeats); err != nil {
+			return
+		}
+		if err = binary.Read(msgReader, binary.BigEndian, &p.Bpm); err != nil {
+			return
+		}
+		m.Players = append(m.Players, p)
+	}
+
+	// bounds check
+	// the rest of our payload should contain exactly enough bytes for the timeline records
+	if msgReader.Len() == int(expectedRecords)*8 {
+		err = errors.New("unknown packet format")
+	}
+
+	// loop through timelines
+	for i := 0; i < int(expectedRecords); i++ {
+		var t float64
+		if err = binary.Read(msgReader, binary.BigEndian, &t); err != nil {
+			return
+		}
+		m.Timelines = append(m.Timelines, t)
+	}
+
+	return
+}
+
+func (m *beatEmitMessage) writeTo(w io.Writer) (err error) {
+	// sanity check number of records
+	numRecords := len(m.Players)
+	if numRecords != len(m.Timelines) {
+		err = errors.New("number of player records must match number of timeline records")
+		return
+	}
+
+	buf := new(bytes.Buffer)
+
+	// write magic bytes to message buffer
+	if _, err = buf.Write(beatEmitMagicBytes); err != nil {
+		return
+	}
+
+	// write clock
+	if err = binary.Write(buf, binary.BigEndian, m.Clock); err != nil {
+		return
+	}
+
+	// write number of records
+	if err = binary.Write(buf, binary.BigEndian, uint32(numRecords)); err != nil {
+		return
+	}
+
+	// write beat info records
+	for _, bi := range m.Players {
+		if err = binary.Write(buf, binary.BigEndian, bi.Beat); err != nil {
+			return
+		}
+		if err = binary.Write(buf, binary.BigEndian, bi.TotalBeats); err != nil {
+			return
+		}
+		if err = binary.Write(buf, binary.BigEndian, bi.Bpm); err != nil {
+			return
+		}
+	}
+
+	// write timeline records
+	for _, tl := range m.Timelines {
+		if err = binary.Write(buf, binary.BigEndian, tl); err != nil {
+			return
+		}
+	}
+
+	// send message length over wire
+	if err = binary.Write(w, binary.BigEndian, uint32(buf.Len())); err != nil {
+		return
+	}
+
+	// send actual message over wire
+	_, err = w.Write(buf.Bytes())
+	return
+}
+
 // discovererMessageAction is the action taken by a device as part of StagelinQ device discovery.
 // Possible values are DiscovererHowdy or DiscovererExit.
 type discovererMessageAction string
