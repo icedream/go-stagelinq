@@ -153,7 +153,7 @@ discoveryLoop:
 							stateMapConn.Subscribe(stateValue)
 						}
 						for state := range stateMapConn.StateC() {
-							log.Printf("\t%s = %s", state.Name, state.Value)
+							log.Printf("\t%s = %v", state.Name, state.Value)
 							m[state.Name] = true
 							if allStateValuesReceived(m) {
 								break
