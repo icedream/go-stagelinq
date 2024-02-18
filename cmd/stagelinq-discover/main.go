@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/json"
+	"flag"
 	"log"
+	"os"
 	"time"
 
 	"github.com/icedream/go-stagelinq"
@@ -11,6 +14,10 @@ const (
 	appName    = "Icedream StagelinQ Receiver"
 	appVersion = "0.0.0"
 	timeout    = 5 * time.Second
+)
+
+var (
+	fOutput = flag.String("output", "text", "output format: text|json")
 )
 
 var stateValues = []string{
@@ -73,6 +80,25 @@ func allStateValuesReceived(v map[string]bool) bool {
 }
 
 func main() {
+	flag.Parse()
+
+	var display func(*stagelinq.State)
+
+	switch *fOutput {
+	case "text":
+		display = func(state *stagelinq.State) {
+			log.Printf("\t%s = %v", state.Name, state.Value)
+		}
+	case "json":
+		je := json.NewEncoder(os.Stdout)
+		je.SetIndent("", "  ")
+		display = func(state *stagelinq.State) {
+			if err := je.Encode(state); err != nil {
+				panic(err)
+			}
+		}
+	}
+
 	listener, err := stagelinq.ListenWithConfiguration(&stagelinq.ListenerConfiguration{
 		DiscoveryTimeout: timeout,
 		SoftwareName:     appName,
@@ -153,7 +179,7 @@ discoveryLoop:
 							stateMapConn.Subscribe(stateValue)
 						}
 						for state := range stateMapConn.StateC() {
-							log.Printf("\t%s = %v", state.Name, state.Value)
+							display(state)
 							m[state.Name] = true
 							if allStateValuesReceived(m) {
 								break
