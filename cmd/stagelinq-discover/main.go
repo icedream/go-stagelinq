@@ -16,9 +16,7 @@ const (
 	timeout    = 5 * time.Second
 )
 
-var (
-	fOutput = flag.String("output", "text", "output format: text|json")
-)
+var fOutput = flag.String("output", "text", "output format: text|json")
 
 var stateValues = []string{
 	stagelinq.EngineDeck1.Play(),
