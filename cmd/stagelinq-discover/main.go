@@ -97,6 +97,8 @@ func main() {
 				panic(err)
 			}
 		}
+	default:
+		panic("unknown format: " + *fOutput)
 	}
 
 	listener, err := stagelinq.ListenWithConfiguration(&stagelinq.ListenerConfiguration{
