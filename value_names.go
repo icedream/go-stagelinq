@@ -1,5 +1,7 @@
 package stagelinq
 
+import "fmt"
+
 const (
 	ClientLibrarianDevicesControllerCurrentDevice         = "/Client/Librarian/DevicesController/CurrentDevice"
 	ClientLibrarianDevicesControllerHasSDCardConnected    = "/Client/Librarian/DevicesController/HasSDCardConnected"
@@ -22,188 +24,6 @@ const (
 	ClientPreferencesProfileApplicationPlayerColor4A      = "/Client/Preferences/Profile/Application/PlayerColor4A"
 	ClientPreferencesProfileApplicationPlayerColor4B      = "/Client/Preferences/Profile/Application/PlayerColor4B"
 	ClientPreferencesProfileApplicationSyncMode           = "/Client/Preferences/Profile/Application/SyncMode"
-	EngineDeck1CurrentBPM                                 = "/Engine/Deck1/CurrentBPM"
-	EngineDeck1DeckIsMaster                               = "/Engine/Deck1/DeckIsMaster"
-	EngineDeck1ExternalMixerVolume                        = "/Engine/Deck1/ExternalMixerVolume"
-	EngineDeck1ExternalScratchWheelTouch                  = "/Engine/Deck1/ExternalScratchWheelTouch"
-	EngineDeck1PadsView                                   = "/Engine/Deck1/Pads/View"
-	EngineDeck1Play                                       = "/Engine/Deck1/Play"
-	EngineDeck1PlayState                                  = "/Engine/Deck1/PlayState"
-	EngineDeck1PlayStatePath                              = "/Engine/Deck1/PlayStatePath"
-	EngineDeck1Speed                                      = "/Engine/Deck1/Speed"
-	EngineDeck1SpeedNeutral                               = "/Engine/Deck1/SpeedNeutral"
-	EngineDeck1SpeedOffsetDown                            = "/Engine/Deck1/SpeedOffsetDown"
-	EngineDeck1SpeedOffsetUp                              = "/Engine/Deck1/SpeedOffsetUp"
-	EngineDeck1SpeedRange                                 = "/Engine/Deck1/SpeedRange"
-	EngineDeck1SpeedState                                 = "/Engine/Deck1/SpeedState"
-	EngineDeck1SyncMode                                   = "/Engine/Deck1/SyncMode"
-	EngineDeck1TrackArtistName                            = "/Engine/Deck1/Track/ArtistName"
-	EngineDeck1TrackBleep                                 = "/Engine/Deck1/Track/Bleep"
-	EngineDeck1TrackCuePosition                           = "/Engine/Deck1/Track/CuePosition"
-	EngineDeck1TrackCurrentBPM                            = "/Engine/Deck1/Track/CurrentBPM"
-	EngineDeck1TrackCurrentKeyIndex                       = "/Engine/Deck1/Track/CurrentKeyIndex"
-	EngineDeck1TrackCurrentLoopInPosition                 = "/Engine/Deck1/Track/CurrentLoopInPosition"
-	EngineDeck1TrackCurrentLoopOutPosition                = "/Engine/Deck1/Track/CurrentLoopOutPosition"
-	EngineDeck1TrackCurrentLoopSizeInBeats                = "/Engine/Deck1/Track/CurrentLoopSizeInBeats"
-	EngineDeck1TrackKeyLock                               = "/Engine/Deck1/Track/KeyLock"
-	EngineDeck1TrackLoopEnableState                       = "/Engine/Deck1/Track/LoopEnableState"
-	EngineDeck1TrackLoopQuickLoop1                        = "/Engine/Deck1/Track/Loop/QuickLoop1"
-	EngineDeck1TrackLoopQuickLoop2                        = "/Engine/Deck1/Track/Loop/QuickLoop2"
-	EngineDeck1TrackLoopQuickLoop3                        = "/Engine/Deck1/Track/Loop/QuickLoop3"
-	EngineDeck1TrackLoopQuickLoop4                        = "/Engine/Deck1/Track/Loop/QuickLoop4"
-	EngineDeck1TrackLoopQuickLoop5                        = "/Engine/Deck1/Track/Loop/QuickLoop5"
-	EngineDeck1TrackLoopQuickLoop6                        = "/Engine/Deck1/Track/Loop/QuickLoop6"
-	EngineDeck1TrackLoopQuickLoop7                        = "/Engine/Deck1/Track/Loop/QuickLoop7"
-	EngineDeck1TrackLoopQuickLoop8                        = "/Engine/Deck1/Track/Loop/QuickLoop8"
-	EngineDeck1TrackPlayPauseLEDState                     = "/Engine/Deck1/Track/PlayPauseLEDState"
-	EngineDeck1TrackSampleRate                            = "/Engine/Deck1/Track/SampleRate"
-	EngineDeck1TrackSongAnalyzed                          = "/Engine/Deck1/Track/SongAnalyzed"
-	EngineDeck1TrackSongLoaded                            = "/Engine/Deck1/Track/SongLoaded"
-	EngineDeck1TrackSongName                              = "/Engine/Deck1/Track/SongName"
-	EngineDeck1TrackSoundSwitchGUID                       = "/Engine/Deck1/Track/SoundSwitchGuid"
-	EngineDeck1TrackTrackBytes                            = "/Engine/Deck1/Track/TrackBytes"
-	EngineDeck1TrackTrackData                             = "/Engine/Deck1/Track/TrackData"
-	EngineDeck1TrackTrackLength                           = "/Engine/Deck1/Track/TrackLength"
-	EngineDeck1TrackTrackName                             = "/Engine/Deck1/Track/TrackName"
-	EngineDeck1TrackTrackNetworkPath                      = "/Engine/Deck1/Track/TrackNetworkPath"
-	EngineDeck1TrackTrackURI                              = "/Engine/Deck1/Track/TrackUri"
-	EngineDeck1TrackTrackWasPlayed                        = "/Engine/Deck1/Track/TrackWasPlayed"
-	EngineDeck2CurrentBPM                                 = "/Engine/Deck2/CurrentBPM"
-	EngineDeck2DeckIsMaster                               = "/Engine/Deck2/DeckIsMaster"
-	EngineDeck2ExternalMixerVolume                        = "/Engine/Deck2/ExternalMixerVolume"
-	EngineDeck2ExternalScratchWheelTouch                  = "/Engine/Deck2/ExternalScratchWheelTouch"
-	EngineDeck2PadsView                                   = "/Engine/Deck2/Pads/View"
-	EngineDeck2Play                                       = "/Engine/Deck2/Play"
-	EngineDeck2PlayState                                  = "/Engine/Deck2/PlayState"
-	EngineDeck2PlayStatePath                              = "/Engine/Deck2/PlayStatePath"
-	EngineDeck2Speed                                      = "/Engine/Deck2/Speed"
-	EngineDeck2SpeedNeutral                               = "/Engine/Deck2/SpeedNeutral"
-	EngineDeck2SpeedOffsetDown                            = "/Engine/Deck2/SpeedOffsetDown"
-	EngineDeck2SpeedOffsetUp                              = "/Engine/Deck2/SpeedOffsetUp"
-	EngineDeck2SpeedRange                                 = "/Engine/Deck2/SpeedRange"
-	EngineDeck2SpeedState                                 = "/Engine/Deck2/SpeedState"
-	EngineDeck2SyncMode                                   = "/Engine/Deck2/SyncMode"
-	EngineDeck2TrackArtistName                            = "/Engine/Deck2/Track/ArtistName"
-	EngineDeck2TrackBleep                                 = "/Engine/Deck2/Track/Bleep"
-	EngineDeck2TrackCuePosition                           = "/Engine/Deck2/Track/CuePosition"
-	EngineDeck2TrackCurrentBPM                            = "/Engine/Deck2/Track/CurrentBPM"
-	EngineDeck2TrackCurrentKeyIndex                       = "/Engine/Deck2/Track/CurrentKeyIndex"
-	EngineDeck2TrackCurrentLoopInPosition                 = "/Engine/Deck2/Track/CurrentLoopInPosition"
-	EngineDeck2TrackCurrentLoopOutPosition                = "/Engine/Deck2/Track/CurrentLoopOutPosition"
-	EngineDeck2TrackCurrentLoopSizeInBeats                = "/Engine/Deck2/Track/CurrentLoopSizeInBeats"
-	EngineDeck2TrackKeyLock                               = "/Engine/Deck2/Track/KeyLock"
-	EngineDeck2TrackLoopEnableState                       = "/Engine/Deck2/Track/LoopEnableState"
-	EngineDeck2TrackLoopQuickLoop1                        = "/Engine/Deck2/Track/Loop/QuickLoop1"
-	EngineDeck2TrackLoopQuickLoop2                        = "/Engine/Deck2/Track/Loop/QuickLoop2"
-	EngineDeck2TrackLoopQuickLoop3                        = "/Engine/Deck2/Track/Loop/QuickLoop3"
-	EngineDeck2TrackLoopQuickLoop4                        = "/Engine/Deck2/Track/Loop/QuickLoop4"
-	EngineDeck2TrackLoopQuickLoop5                        = "/Engine/Deck2/Track/Loop/QuickLoop5"
-	EngineDeck2TrackLoopQuickLoop6                        = "/Engine/Deck2/Track/Loop/QuickLoop6"
-	EngineDeck2TrackLoopQuickLoop7                        = "/Engine/Deck2/Track/Loop/QuickLoop7"
-	EngineDeck2TrackLoopQuickLoop8                        = "/Engine/Deck2/Track/Loop/QuickLoop8"
-	EngineDeck2TrackPlayPauseLEDState                     = "/Engine/Deck2/Track/PlayPauseLEDState"
-	EngineDeck2TrackSampleRate                            = "/Engine/Deck2/Track/SampleRate"
-	EngineDeck2TrackSongAnalyzed                          = "/Engine/Deck2/Track/SongAnalyzed"
-	EngineDeck2TrackSongLoaded                            = "/Engine/Deck2/Track/SongLoaded"
-	EngineDeck2TrackSongName                              = "/Engine/Deck2/Track/SongName"
-	EngineDeck2TrackSoundSwitchGUID                       = "/Engine/Deck2/Track/SoundSwitchGuid"
-	EngineDeck2TrackTrackBytes                            = "/Engine/Deck2/Track/TrackBytes"
-	EngineDeck2TrackTrackData                             = "/Engine/Deck2/Track/TrackData"
-	EngineDeck2TrackTrackLength                           = "/Engine/Deck2/Track/TrackLength"
-	EngineDeck2TrackTrackName                             = "/Engine/Deck2/Track/TrackName"
-	EngineDeck2TrackTrackNetworkPath                      = "/Engine/Deck2/Track/TrackNetworkPath"
-	EngineDeck2TrackTrackURI                              = "/Engine/Deck2/Track/TrackUri"
-	EngineDeck2TrackTrackWasPlayed                        = "/Engine/Deck2/Track/TrackWasPlayed"
-	EngineDeck3CurrentBPM                                 = "/Engine/Deck3/CurrentBPM"
-	EngineDeck3ExternalMixerVolume                        = "/Engine/Deck3/ExternalMixerVolume"
-	EngineDeck3ExternalScratchWheelTouch                  = "/Engine/Deck3/ExternalScratchWheelTouch"
-	EngineDeck3PadsView                                   = "/Engine/Deck3/Pads/View"
-	EngineDeck3Play                                       = "/Engine/Deck3/Play"
-	EngineDeck3PlayState                                  = "/Engine/Deck3/PlayState"
-	EngineDeck3PlayStatePath                              = "/Engine/Deck3/PlayStatePath"
-	EngineDeck3Speed                                      = "/Engine/Deck3/Speed"
-	EngineDeck3SpeedNeutral                               = "/Engine/Deck3/SpeedNeutral"
-	EngineDeck3SpeedOffsetDown                            = "/Engine/Deck3/SpeedOffsetDown"
-	EngineDeck3SpeedOffsetUp                              = "/Engine/Deck3/SpeedOffsetUp"
-	EngineDeck3SpeedRange                                 = "/Engine/Deck3/SpeedRange"
-	EngineDeck3SpeedState                                 = "/Engine/Deck3/SpeedState"
-	EngineDeck3SyncMode                                   = "/Engine/Deck3/SyncMode"
-	EngineDeck3TrackArtistName                            = "/Engine/Deck3/Track/ArtistName"
-	EngineDeck3TrackBleep                                 = "/Engine/Deck3/Track/Bleep"
-	EngineDeck3TrackCuePosition                           = "/Engine/Deck3/Track/CuePosition"
-	EngineDeck3TrackCurrentBPM                            = "/Engine/Deck3/Track/CurrentBPM"
-	EngineDeck3TrackCurrentKeyIndex                       = "/Engine/Deck3/Track/CurrentKeyIndex"
-	EngineDeck3TrackCurrentLoopInPosition                 = "/Engine/Deck3/Track/CurrentLoopInPosition"
-	EngineDeck3TrackCurrentLoopOutPosition                = "/Engine/Deck3/Track/CurrentLoopOutPosition"
-	EngineDeck3TrackCurrentLoopSizeInBeats                = "/Engine/Deck3/Track/CurrentLoopSizeInBeats"
-	EngineDeck3TrackKeyLock                               = "/Engine/Deck3/Track/KeyLock"
-	EngineDeck3TrackLoopEnableState                       = "/Engine/Deck3/Track/LoopEnableState"
-	EngineDeck3TrackLoopQuickLoop1                        = "/Engine/Deck3/Track/Loop/QuickLoop1"
-	EngineDeck3TrackLoopQuickLoop2                        = "/Engine/Deck3/Track/Loop/QuickLoop2"
-	EngineDeck3TrackLoopQuickLoop3                        = "/Engine/Deck3/Track/Loop/QuickLoop3"
-	EngineDeck3TrackLoopQuickLoop4                        = "/Engine/Deck3/Track/Loop/QuickLoop4"
-	EngineDeck3TrackLoopQuickLoop5                        = "/Engine/Deck3/Track/Loop/QuickLoop5"
-	EngineDeck3TrackLoopQuickLoop6                        = "/Engine/Deck3/Track/Loop/QuickLoop6"
-	EngineDeck3TrackLoopQuickLoop7                        = "/Engine/Deck3/Track/Loop/QuickLoop7"
-	EngineDeck3TrackLoopQuickLoop8                        = "/Engine/Deck3/Track/Loop/QuickLoop8"
-	EngineDeck3TrackPlayPauseLEDState                     = "/Engine/Deck3/Track/PlayPauseLEDState"
-	EngineDeck3TrackSampleRate                            = "/Engine/Deck3/Track/SampleRate"
-	EngineDeck3TrackSongAnalyzed                          = "/Engine/Deck3/Track/SongAnalyzed"
-	EngineDeck3TrackSongLoaded                            = "/Engine/Deck3/Track/SongLoaded"
-	EngineDeck3TrackSongName                              = "/Engine/Deck3/Track/SongName"
-	EngineDeck3TrackSoundSwitchGUID                       = "/Engine/Deck3/Track/SoundSwitchGuid"
-	EngineDeck3TrackTrackBytes                            = "/Engine/Deck3/Track/TrackBytes"
-	EngineDeck3TrackTrackData                             = "/Engine/Deck3/Track/TrackData"
-	EngineDeck3TrackTrackLength                           = "/Engine/Deck3/Track/TrackLength"
-	EngineDeck3TrackTrackName                             = "/Engine/Deck3/Track/TrackName"
-	EngineDeck3TrackTrackNetworkPath                      = "/Engine/Deck3/Track/TrackNetworkPath"
-	EngineDeck3TrackTrackURI                              = "/Engine/Deck3/Track/TrackUri"
-	EngineDeck3TrackTrackWasPlayed                        = "/Engine/Deck3/Track/TrackWasPlayed"
-	EngineDeck4CurrentBPM                                 = "/Engine/Deck4/CurrentBPM"
-	EngineDeck4ExternalMixerVolume                        = "/Engine/Deck4/ExternalMixerVolume"
-	EngineDeck4ExternalScratchWheelTouch                  = "/Engine/Deck4/ExternalScratchWheelTouch"
-	EngineDeck4PadsView                                   = "/Engine/Deck4/Pads/View"
-	EngineDeck4Play                                       = "/Engine/Deck4/Play"
-	EngineDeck4PlayState                                  = "/Engine/Deck4/PlayState"
-	EngineDeck4PlayStatePath                              = "/Engine/Deck4/PlayStatePath"
-	EngineDeck4Speed                                      = "/Engine/Deck4/Speed"
-	EngineDeck4SpeedNeutral                               = "/Engine/Deck4/SpeedNeutral"
-	EngineDeck4SpeedOffsetDown                            = "/Engine/Deck4/SpeedOffsetDown"
-	EngineDeck4SpeedOffsetUp                              = "/Engine/Deck4/SpeedOffsetUp"
-	EngineDeck4SpeedRange                                 = "/Engine/Deck4/SpeedRange"
-	EngineDeck4SpeedState                                 = "/Engine/Deck4/SpeedState"
-	EngineDeck4SyncMode                                   = "/Engine/Deck4/SyncMode"
-	EngineDeck4TrackArtistName                            = "/Engine/Deck4/Track/ArtistName"
-	EngineDeck4TrackBleep                                 = "/Engine/Deck4/Track/Bleep"
-	EngineDeck4TrackCuePosition                           = "/Engine/Deck4/Track/CuePosition"
-	EngineDeck4TrackCurrentBPM                            = "/Engine/Deck4/Track/CurrentBPM"
-	EngineDeck4TrackCurrentKeyIndex                       = "/Engine/Deck4/Track/CurrentKeyIndex"
-	EngineDeck4TrackCurrentLoopInPosition                 = "/Engine/Deck4/Track/CurrentLoopInPosition"
-	EngineDeck4TrackCurrentLoopOutPosition                = "/Engine/Deck4/Track/CurrentLoopOutPosition"
-	EngineDeck4TrackCurrentLoopSizeInBeats                = "/Engine/Deck4/Track/CurrentLoopSizeInBeats"
-	EngineDeck4TrackKeyLock                               = "/Engine/Deck4/Track/KeyLock"
-	EngineDeck4TrackLoopEnableState                       = "/Engine/Deck4/Track/LoopEnableState"
-	EngineDeck4TrackLoopQuickLoop1                        = "/Engine/Deck4/Track/Loop/QuickLoop1"
-	EngineDeck4TrackLoopQuickLoop2                        = "/Engine/Deck4/Track/Loop/QuickLoop2"
-	EngineDeck4TrackLoopQuickLoop3                        = "/Engine/Deck4/Track/Loop/QuickLoop3"
-	EngineDeck4TrackLoopQuickLoop4                        = "/Engine/Deck4/Track/Loop/QuickLoop4"
-	EngineDeck4TrackLoopQuickLoop5                        = "/Engine/Deck4/Track/Loop/QuickLoop5"
-	EngineDeck4TrackLoopQuickLoop6                        = "/Engine/Deck4/Track/Loop/QuickLoop6"
-	EngineDeck4TrackLoopQuickLoop7                        = "/Engine/Deck4/Track/Loop/QuickLoop7"
-	EngineDeck4TrackLoopQuickLoop8                        = "/Engine/Deck4/Track/Loop/QuickLoop8"
-	EngineDeck4TrackPlayPauseLEDState                     = "/Engine/Deck4/Track/PlayPauseLEDState"
-	EngineDeck4TrackSampleRate                            = "/Engine/Deck4/Track/SampleRate"
-	EngineDeck4TrackSongAnalyzed                          = "/Engine/Deck4/Track/SongAnalyzed"
-	EngineDeck4TrackSongLoaded                            = "/Engine/Deck4/Track/SongLoaded"
-	EngineDeck4TrackSongName                              = "/Engine/Deck4/Track/SongName"
-	EngineDeck4TrackSoundSwitchGUID                       = "/Engine/Deck4/Track/SoundSwitchGuid"
-	EngineDeck4TrackTrackBytes                            = "/Engine/Deck4/Track/TrackBytes"
-	EngineDeck4TrackTrackData                             = "/Engine/Deck4/Track/TrackData"
-	EngineDeck4TrackTrackLength                           = "/Engine/Deck4/Track/TrackLength"
-	EngineDeck4TrackTrackName                             = "/Engine/Deck4/Track/TrackName"
-	EngineDeck4TrackTrackNetworkPath                      = "/Engine/Deck4/Track/TrackNetworkPath"
-	EngineDeck4TrackTrackURI                              = "/Engine/Deck4/Track/TrackUri"
-	EngineDeck4TrackTrackWasPlayed                        = "/Engine/Deck4/Track/TrackWasPlayed"
 	EngineDeckCount                                       = "/Engine/DeckCount"
 	EngineMasterMasterTempo                               = "/Engine/Master/MasterTempo"
 	EngineSyncNetworkMasterStatus                         = "/Engine/Sync/Network/MasterStatus"
@@ -220,3 +40,590 @@ const (
 	MixerCrossfaderPosition                               = "/Mixer/CrossfaderPosition"
 	MixerNumberOfChannels                                 = "/Mixer/NumberOfChannels"
 )
+
+// Deck 1 legacy variables
+//
+// Deprecated: Use values from [EngineDeck1] instead.
+var (
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.CurrentBPM] method instead.
+	EngineDeck1CurrentBPM = EngineDeck1.CurrentBPM()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.DeckIsMaster] method instead.
+	EngineDeck1DeckIsMaster = EngineDeck1.DeckIsMaster()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.ExternalMixerVolume] method instead.
+	EngineDeck1ExternalMixerVolume = EngineDeck1.ExternalMixerVolume()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.ExternalScratchWheelTouch] method instead.
+	EngineDeck1ExternalScratchWheelTouch = EngineDeck1.ExternalScratchWheelTouch()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.PadsView] method instead.
+	EngineDeck1PadsView = EngineDeck1.PadsView()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.Play] method instead.
+	EngineDeck1Play = EngineDeck1.Play()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.PlayState] method instead.
+	EngineDeck1PlayState = EngineDeck1.PlayState()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.PlayStatePath] method instead.
+	EngineDeck1PlayStatePath = EngineDeck1.PlayStatePath()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.Speed] method instead.
+	EngineDeck1Speed = EngineDeck1.Speed()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.SpeedNeutral] method instead.
+	EngineDeck1SpeedNeutral = EngineDeck1.SpeedNeutral()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.SpeedOffsetDown] method instead.
+	EngineDeck1SpeedOffsetDown = EngineDeck1.SpeedOffsetDown()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.SpeedOffsetUp] method instead.
+	EngineDeck1SpeedOffsetUp = EngineDeck1.SpeedOffsetUp()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.SpeedRange] method instead.
+	EngineDeck1SpeedRange = EngineDeck1.SpeedRange()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.SpeedState] method instead.
+	EngineDeck1SpeedState = EngineDeck1.SpeedState()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.SyncMode] method instead.
+	EngineDeck1SyncMode = EngineDeck1.SyncMode()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackArtistName] method instead.
+	EngineDeck1TrackArtistName = EngineDeck1.TrackArtistName()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackBleep] method instead.
+	EngineDeck1TrackBleep = EngineDeck1.TrackBleep()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackCuePosition] method instead.
+	EngineDeck1TrackCuePosition = EngineDeck1.TrackCuePosition()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackCurrentBPM] method instead.
+	EngineDeck1TrackCurrentBPM = EngineDeck1.TrackCurrentBPM()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackCurrentKeyIndex] method instead.
+	EngineDeck1TrackCurrentKeyIndex = EngineDeck1.TrackCurrentKeyIndex()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackCurrentLoopInPosition] method instead.
+	EngineDeck1TrackCurrentLoopInPosition = EngineDeck1.TrackCurrentLoopInPosition()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackCurrentLoopOutPosition] method instead.
+	EngineDeck1TrackCurrentLoopOutPosition = EngineDeck1.TrackCurrentLoopOutPosition()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackCurrentLoopSizeInBeats] method instead.
+	EngineDeck1TrackCurrentLoopSizeInBeats = EngineDeck1.TrackCurrentLoopSizeInBeats()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackKeyLock] method instead.
+	EngineDeck1TrackKeyLock = EngineDeck1.TrackKeyLock()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackLoopEnableState] method instead.
+	EngineDeck1TrackLoopEnableState = EngineDeck1.TrackLoopEnableState()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackLoopQuickLoop1] method instead.
+	EngineDeck1TrackLoopQuickLoop1 = EngineDeck1.TrackLoopQuickLoop1()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackLoopQuickLoop2] method instead.
+	EngineDeck1TrackLoopQuickLoop2 = EngineDeck1.TrackLoopQuickLoop2()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackLoopQuickLoop3] method instead.
+	EngineDeck1TrackLoopQuickLoop3 = EngineDeck1.TrackLoopQuickLoop3()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackLoopQuickLoop4] method instead.
+	EngineDeck1TrackLoopQuickLoop4 = EngineDeck1.TrackLoopQuickLoop4()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackLoopQuickLoop5] method instead.
+	EngineDeck1TrackLoopQuickLoop5 = EngineDeck1.TrackLoopQuickLoop5()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackLoopQuickLoop6] method instead.
+	EngineDeck1TrackLoopQuickLoop6 = EngineDeck1.TrackLoopQuickLoop6()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackLoopQuickLoop7] method instead.
+	EngineDeck1TrackLoopQuickLoop7 = EngineDeck1.TrackLoopQuickLoop7()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackLoopQuickLoop8] method instead.
+	EngineDeck1TrackLoopQuickLoop8 = EngineDeck1.TrackLoopQuickLoop8()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackPlayPauseLEDState] method instead.
+	EngineDeck1TrackPlayPauseLEDState = EngineDeck1.TrackPlayPauseLEDState()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackSampleRate] method instead.
+	EngineDeck1TrackSampleRate = EngineDeck1.TrackSampleRate()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackSongAnalyzed] method instead.
+	EngineDeck1TrackSongAnalyzed = EngineDeck1.TrackSongAnalyzed()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackSongLoaded] method instead.
+	EngineDeck1TrackSongLoaded = EngineDeck1.TrackSongLoaded()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackSongName] method instead.
+	EngineDeck1TrackSongName = EngineDeck1.TrackSongName()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackSoundSwitchGuid] method instead.
+	EngineDeck1TrackSoundSwitchGUID = EngineDeck1.TrackSoundSwitchGuid()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackTrackBytes] method instead.
+	EngineDeck1TrackTrackBytes = EngineDeck1.TrackTrackBytes()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackTrackData] method instead.
+	EngineDeck1TrackTrackData = EngineDeck1.TrackTrackData()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackTrackLength] method instead.
+	EngineDeck1TrackTrackLength = EngineDeck1.TrackTrackLength()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackTrackName] method instead.
+	EngineDeck1TrackTrackName = EngineDeck1.TrackTrackName()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackTrackNetworkPath] method instead.
+	EngineDeck1TrackTrackNetworkPath = EngineDeck1.TrackTrackNetworkPath()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackTrackUri] method instead.
+	EngineDeck1TrackTrackURI = EngineDeck1.TrackTrackUri()
+	// Deprecated: Use [EngineDeck1] and its [DeckValueNames.TrackTrackWasPlayed] method instead.
+	EngineDeck1TrackTrackWasPlayed = EngineDeck1.TrackTrackWasPlayed()
+)
+
+// Deck 2 legacy variables
+//
+// Deprecated: Use values from [EngineDeck2] instead.
+var (
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.CurrentBPM] method instead.
+	EngineDeck2CurrentBPM = EngineDeck2.CurrentBPM()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.DeckIsMaster] method instead.
+	EngineDeck2DeckIsMaster = EngineDeck2.DeckIsMaster()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.ExternalMixerVolume] method instead.
+	EngineDeck2ExternalMixerVolume = EngineDeck2.ExternalMixerVolume()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.ExternalScratchWheelTouch] method instead.
+	EngineDeck2ExternalScratchWheelTouch = EngineDeck2.ExternalScratchWheelTouch()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.PadsView] method instead.
+	EngineDeck2PadsView = EngineDeck2.PadsView()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.Play] method instead.
+	EngineDeck2Play = EngineDeck2.Play()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.PlayState] method instead.
+	EngineDeck2PlayState = EngineDeck2.PlayState()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.PlayStatePath] method instead.
+	EngineDeck2PlayStatePath = EngineDeck2.PlayStatePath()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.Speed] method instead.
+	EngineDeck2Speed = EngineDeck2.Speed()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.SpeedNeutral] method instead.
+	EngineDeck2SpeedNeutral = EngineDeck2.SpeedNeutral()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.SpeedOffsetDown] method instead.
+	EngineDeck2SpeedOffsetDown = EngineDeck2.SpeedOffsetDown()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.SpeedOffsetUp] method instead.
+	EngineDeck2SpeedOffsetUp = EngineDeck2.SpeedOffsetUp()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.SpeedRange] method instead.
+	EngineDeck2SpeedRange = EngineDeck2.SpeedRange()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.SpeedState] method instead.
+	EngineDeck2SpeedState = EngineDeck2.SpeedState()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.SyncMode] method instead.
+	EngineDeck2SyncMode = EngineDeck2.SyncMode()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackArtistName] method instead.
+	EngineDeck2TrackArtistName = EngineDeck2.TrackArtistName()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackBleep] method instead.
+	EngineDeck2TrackBleep = EngineDeck2.TrackBleep()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackCuePosition] method instead.
+	EngineDeck2TrackCuePosition = EngineDeck2.TrackCuePosition()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackCurrentBPM] method instead.
+	EngineDeck2TrackCurrentBPM = EngineDeck2.TrackCurrentBPM()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackCurrentKeyIndex] method instead.
+	EngineDeck2TrackCurrentKeyIndex = EngineDeck2.TrackCurrentKeyIndex()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackCurrentLoopInPosition] method instead.
+	EngineDeck2TrackCurrentLoopInPosition = EngineDeck2.TrackCurrentLoopInPosition()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackCurrentLoopOutPosition] method instead.
+	EngineDeck2TrackCurrentLoopOutPosition = EngineDeck2.TrackCurrentLoopOutPosition()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackCurrentLoopSizeInBeats] method instead.
+	EngineDeck2TrackCurrentLoopSizeInBeats = EngineDeck2.TrackCurrentLoopSizeInBeats()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackKeyLock] method instead.
+	EngineDeck2TrackKeyLock = EngineDeck2.TrackKeyLock()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackLoopEnableState] method instead.
+	EngineDeck2TrackLoopEnableState = EngineDeck2.TrackLoopEnableState()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackLoopQuickLoop1] method instead.
+	EngineDeck2TrackLoopQuickLoop1 = EngineDeck2.TrackLoopQuickLoop1()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackLoopQuickLoop2] method instead.
+	EngineDeck2TrackLoopQuickLoop2 = EngineDeck2.TrackLoopQuickLoop2()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackLoopQuickLoop3] method instead.
+	EngineDeck2TrackLoopQuickLoop3 = EngineDeck2.TrackLoopQuickLoop3()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackLoopQuickLoop4] method instead.
+	EngineDeck2TrackLoopQuickLoop4 = EngineDeck2.TrackLoopQuickLoop4()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackLoopQuickLoop5] method instead.
+	EngineDeck2TrackLoopQuickLoop5 = EngineDeck2.TrackLoopQuickLoop5()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackLoopQuickLoop6] method instead.
+	EngineDeck2TrackLoopQuickLoop6 = EngineDeck2.TrackLoopQuickLoop6()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackLoopQuickLoop7] method instead.
+	EngineDeck2TrackLoopQuickLoop7 = EngineDeck2.TrackLoopQuickLoop7()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackLoopQuickLoop8] method instead.
+	EngineDeck2TrackLoopQuickLoop8 = EngineDeck2.TrackLoopQuickLoop8()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackPlayPauseLEDState] method instead.
+	EngineDeck2TrackPlayPauseLEDState = EngineDeck2.TrackPlayPauseLEDState()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackSampleRate] method instead.
+	EngineDeck2TrackSampleRate = EngineDeck2.TrackSampleRate()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackSongAnalyzed] method instead.
+	EngineDeck2TrackSongAnalyzed = EngineDeck2.TrackSongAnalyzed()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackSongLoaded] method instead.
+	EngineDeck2TrackSongLoaded = EngineDeck2.TrackSongLoaded()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackSongName] method instead.
+	EngineDeck2TrackSongName = EngineDeck2.TrackSongName()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackSoundSwitchGuid] method instead.
+	EngineDeck2TrackSoundSwitchGUID = EngineDeck2.TrackSoundSwitchGuid()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackTrackBytes] method instead.
+	EngineDeck2TrackTrackBytes = EngineDeck2.TrackTrackBytes()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackTrackData] method instead.
+	EngineDeck2TrackTrackData = EngineDeck2.TrackTrackData()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackTrackLength] method instead.
+	EngineDeck2TrackTrackLength = EngineDeck2.TrackTrackLength()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackTrackName] method instead.
+	EngineDeck2TrackTrackName = EngineDeck2.TrackTrackName()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackTrackNetworkPath] method instead.
+	EngineDeck2TrackTrackNetworkPath = EngineDeck2.TrackTrackNetworkPath()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackTrackUri] method instead.
+	EngineDeck2TrackTrackURI = EngineDeck2.TrackTrackUri()
+	// Deprecated: Use [EngineDeck2] and its [DeckValueNames.TrackTrackWasPlayed] method instead.
+	EngineDeck2TrackTrackWasPlayed = EngineDeck2.TrackTrackWasPlayed()
+)
+
+// Deck 3 legacy variables
+//
+// Deprecated: Use values from [EngineDeck3] instead.
+var (
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.CurrentBPM] method instead.
+	EngineDeck3CurrentBPM = EngineDeck3.CurrentBPM()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.DeckIsMaster] method instead.
+	EngineDeck3DeckIsMaster = EngineDeck3.DeckIsMaster()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.ExternalMixerVolume] method instead.
+	EngineDeck3ExternalMixerVolume = EngineDeck3.ExternalMixerVolume()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.ExternalScratchWheelTouch] method instead.
+	EngineDeck3ExternalScratchWheelTouch = EngineDeck3.ExternalScratchWheelTouch()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.PadsView] method instead.
+	EngineDeck3PadsView = EngineDeck3.PadsView()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.Play] method instead.
+	EngineDeck3Play = EngineDeck3.Play()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.PlayState] method instead.
+	EngineDeck3PlayState = EngineDeck3.PlayState()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.PlayStatePath] method instead.
+	EngineDeck3PlayStatePath = EngineDeck3.PlayStatePath()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.Speed] method instead.
+	EngineDeck3Speed = EngineDeck3.Speed()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.SpeedNeutral] method instead.
+	EngineDeck3SpeedNeutral = EngineDeck3.SpeedNeutral()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.SpeedOffsetDown] method instead.
+	EngineDeck3SpeedOffsetDown = EngineDeck3.SpeedOffsetDown()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.SpeedOffsetUp] method instead.
+	EngineDeck3SpeedOffsetUp = EngineDeck3.SpeedOffsetUp()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.SpeedRange] method instead.
+	EngineDeck3SpeedRange = EngineDeck3.SpeedRange()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.SpeedState] method instead.
+	EngineDeck3SpeedState = EngineDeck3.SpeedState()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.SyncMode] method instead.
+	EngineDeck3SyncMode = EngineDeck3.SyncMode()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackArtistName] method instead.
+	EngineDeck3TrackArtistName = EngineDeck3.TrackArtistName()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackBleep] method instead.
+	EngineDeck3TrackBleep = EngineDeck3.TrackBleep()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackCuePosition] method instead.
+	EngineDeck3TrackCuePosition = EngineDeck3.TrackCuePosition()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackCurrentBPM] method instead.
+	EngineDeck3TrackCurrentBPM = EngineDeck3.TrackCurrentBPM()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackCurrentKeyIndex] method instead.
+	EngineDeck3TrackCurrentKeyIndex = EngineDeck3.TrackCurrentKeyIndex()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackCurrentLoopInPosition] method instead.
+	EngineDeck3TrackCurrentLoopInPosition = EngineDeck3.TrackCurrentLoopInPosition()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackCurrentLoopOutPosition] method instead.
+	EngineDeck3TrackCurrentLoopOutPosition = EngineDeck3.TrackCurrentLoopOutPosition()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackCurrentLoopSizeInBeats] method instead.
+	EngineDeck3TrackCurrentLoopSizeInBeats = EngineDeck3.TrackCurrentLoopSizeInBeats()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackKeyLock] method instead.
+	EngineDeck3TrackKeyLock = EngineDeck3.TrackKeyLock()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackLoopEnableState] method instead.
+	EngineDeck3TrackLoopEnableState = EngineDeck3.TrackLoopEnableState()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackLoopQuickLoop1] method instead.
+	EngineDeck3TrackLoopQuickLoop1 = EngineDeck3.TrackLoopQuickLoop1()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackLoopQuickLoop2] method instead.
+	EngineDeck3TrackLoopQuickLoop2 = EngineDeck3.TrackLoopQuickLoop2()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackLoopQuickLoop3] method instead.
+	EngineDeck3TrackLoopQuickLoop3 = EngineDeck3.TrackLoopQuickLoop3()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackLoopQuickLoop4] method instead.
+	EngineDeck3TrackLoopQuickLoop4 = EngineDeck3.TrackLoopQuickLoop4()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackLoopQuickLoop5] method instead.
+	EngineDeck3TrackLoopQuickLoop5 = EngineDeck3.TrackLoopQuickLoop5()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackLoopQuickLoop6] method instead.
+	EngineDeck3TrackLoopQuickLoop6 = EngineDeck3.TrackLoopQuickLoop6()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackLoopQuickLoop7] method instead.
+	EngineDeck3TrackLoopQuickLoop7 = EngineDeck3.TrackLoopQuickLoop7()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackLoopQuickLoop8] method instead.
+	EngineDeck3TrackLoopQuickLoop8 = EngineDeck3.TrackLoopQuickLoop8()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackPlayPauseLEDState] method instead.
+	EngineDeck3TrackPlayPauseLEDState = EngineDeck3.TrackPlayPauseLEDState()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackSampleRate] method instead.
+	EngineDeck3TrackSampleRate = EngineDeck3.TrackSampleRate()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackSongAnalyzed] method instead.
+	EngineDeck3TrackSongAnalyzed = EngineDeck3.TrackSongAnalyzed()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackSongLoaded] method instead.
+	EngineDeck3TrackSongLoaded = EngineDeck3.TrackSongLoaded()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackSongName] method instead.
+	EngineDeck3TrackSongName = EngineDeck3.TrackSongName()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackSoundSwitchGuid] method instead.
+	EngineDeck3TrackSoundSwitchGUID = EngineDeck3.TrackSoundSwitchGuid()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackTrackBytes] method instead.
+	EngineDeck3TrackTrackBytes = EngineDeck3.TrackTrackBytes()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackTrackData] method instead.
+	EngineDeck3TrackTrackData = EngineDeck3.TrackTrackData()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackTrackLength] method instead.
+	EngineDeck3TrackTrackLength = EngineDeck3.TrackTrackLength()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackTrackName] method instead.
+	EngineDeck3TrackTrackName = EngineDeck3.TrackTrackName()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackTrackNetworkPath] method instead.
+	EngineDeck3TrackTrackNetworkPath = EngineDeck3.TrackTrackNetworkPath()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackTrackUri] method instead.
+	EngineDeck3TrackTrackURI = EngineDeck3.TrackTrackUri()
+	// Deprecated: Use [EngineDeck3] and its [DeckValueNames.TrackTrackWasPlayed] method instead.
+	EngineDeck3TrackTrackWasPlayed = EngineDeck3.TrackTrackWasPlayed()
+)
+
+// Deck 4 legacy variables
+//
+// Deprecated: Use values from [EngineDeck4] instead.
+var (
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.CurrentBPM] method instead.
+	EngineDeck4CurrentBPM = EngineDeck4.CurrentBPM()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.DeckIsMaster] method instead.
+	EngineDeck4DeckIsMaster = EngineDeck4.DeckIsMaster()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.ExternalMixerVolume] method instead.
+	EngineDeck4ExternalMixerVolume = EngineDeck4.ExternalMixerVolume()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.ExternalScratchWheelTouch] method instead.
+	EngineDeck4ExternalScratchWheelTouch = EngineDeck4.ExternalScratchWheelTouch()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.PadsView] method instead.
+	EngineDeck4PadsView = EngineDeck4.PadsView()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.Play] method instead.
+	EngineDeck4Play = EngineDeck4.Play()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.PlayState] method instead.
+	EngineDeck4PlayState = EngineDeck4.PlayState()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.PlayStatePath] method instead.
+	EngineDeck4PlayStatePath = EngineDeck4.PlayStatePath()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.Speed] method instead.
+	EngineDeck4Speed = EngineDeck4.Speed()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.SpeedNeutral] method instead.
+	EngineDeck4SpeedNeutral = EngineDeck4.SpeedNeutral()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.SpeedOffsetDown] method instead.
+	EngineDeck4SpeedOffsetDown = EngineDeck4.SpeedOffsetDown()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.SpeedOffsetUp] method instead.
+	EngineDeck4SpeedOffsetUp = EngineDeck4.SpeedOffsetUp()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.SpeedRange] method instead.
+	EngineDeck4SpeedRange = EngineDeck4.SpeedRange()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.SpeedState] method instead.
+	EngineDeck4SpeedState = EngineDeck4.SpeedState()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.SyncMode] method instead.
+	EngineDeck4SyncMode = EngineDeck4.SyncMode()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackArtistName] method instead.
+	EngineDeck4TrackArtistName = EngineDeck4.TrackArtistName()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackBleep] method instead.
+	EngineDeck4TrackBleep = EngineDeck4.TrackBleep()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackCuePosition] method instead.
+	EngineDeck4TrackCuePosition = EngineDeck4.TrackCuePosition()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackCurrentBPM] method instead.
+	EngineDeck4TrackCurrentBPM = EngineDeck4.TrackCurrentBPM()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackCurrentKeyIndex] method instead.
+	EngineDeck4TrackCurrentKeyIndex = EngineDeck4.TrackCurrentKeyIndex()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackCurrentLoopInPosition] method instead.
+	EngineDeck4TrackCurrentLoopInPosition = EngineDeck4.TrackCurrentLoopInPosition()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackCurrentLoopOutPosition] method instead.
+	EngineDeck4TrackCurrentLoopOutPosition = EngineDeck4.TrackCurrentLoopOutPosition()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackCurrentLoopSizeInBeats] method instead.
+	EngineDeck4TrackCurrentLoopSizeInBeats = EngineDeck4.TrackCurrentLoopSizeInBeats()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackKeyLock] method instead.
+	EngineDeck4TrackKeyLock = EngineDeck4.TrackKeyLock()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackLoopEnableState] method instead.
+	EngineDeck4TrackLoopEnableState = EngineDeck4.TrackLoopEnableState()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackLoopQuickLoop1] method instead.
+	EngineDeck4TrackLoopQuickLoop1 = EngineDeck4.TrackLoopQuickLoop1()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackLoopQuickLoop2] method instead.
+	EngineDeck4TrackLoopQuickLoop2 = EngineDeck4.TrackLoopQuickLoop2()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackLoopQuickLoop3] method instead.
+	EngineDeck4TrackLoopQuickLoop3 = EngineDeck4.TrackLoopQuickLoop3()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackLoopQuickLoop4] method instead.
+	EngineDeck4TrackLoopQuickLoop4 = EngineDeck4.TrackLoopQuickLoop4()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackLoopQuickLoop5] method instead.
+	EngineDeck4TrackLoopQuickLoop5 = EngineDeck4.TrackLoopQuickLoop5()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackLoopQuickLoop6] method instead.
+	EngineDeck4TrackLoopQuickLoop6 = EngineDeck4.TrackLoopQuickLoop6()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackLoopQuickLoop7] method instead.
+	EngineDeck4TrackLoopQuickLoop7 = EngineDeck4.TrackLoopQuickLoop7()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackLoopQuickLoop8] method instead.
+	EngineDeck4TrackLoopQuickLoop8 = EngineDeck4.TrackLoopQuickLoop8()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackPlayPauseLEDState] method instead.
+	EngineDeck4TrackPlayPauseLEDState = EngineDeck4.TrackPlayPauseLEDState()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackSampleRate] method instead.
+	EngineDeck4TrackSampleRate = EngineDeck4.TrackSampleRate()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackSongAnalyzed] method instead.
+	EngineDeck4TrackSongAnalyzed = EngineDeck4.TrackSongAnalyzed()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackSongLoaded] method instead.
+	EngineDeck4TrackSongLoaded = EngineDeck4.TrackSongLoaded()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackSongName] method instead.
+	EngineDeck4TrackSongName = EngineDeck4.TrackSongName()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackSoundSwitchGuid] method instead.
+	EngineDeck4TrackSoundSwitchGUID = EngineDeck4.TrackSoundSwitchGuid()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackTrackBytes] method instead.
+	EngineDeck4TrackTrackBytes = EngineDeck4.TrackTrackBytes()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackTrackData] method instead.
+	EngineDeck4TrackTrackData = EngineDeck4.TrackTrackData()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackTrackLength] method instead.
+	EngineDeck4TrackTrackLength = EngineDeck4.TrackTrackLength()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackTrackName] method instead.
+	EngineDeck4TrackTrackName = EngineDeck4.TrackTrackName()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackTrackNetworkPath] method instead.
+	EngineDeck4TrackTrackNetworkPath = EngineDeck4.TrackTrackNetworkPath()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackTrackUri] method instead.
+	EngineDeck4TrackTrackURI = EngineDeck4.TrackTrackUri()
+	// Deprecated: Use [EngineDeck4] and its [DeckValueNames.TrackTrackWasPlayed] method instead.
+	EngineDeck4TrackTrackWasPlayed = EngineDeck4.TrackTrackWasPlayed()
+)
+
+var (
+	EngineDeck1 = DeckValueNames{DeckIndex: 1}
+	EngineDeck2 = DeckValueNames{DeckIndex: 2}
+	EngineDeck3 = DeckValueNames{DeckIndex: 3}
+	EngineDeck4 = DeckValueNames{DeckIndex: 4}
+)
+
+type DeckValueNames struct {
+	DeckIndex int
+}
+
+func (n *DeckValueNames) PadsView() string {
+	return fmt.Sprintf("/Engine/Deck%d/Pads/View", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackArtistName() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/ArtistName", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackBleep() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/Bleep", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackCuePosition() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/CuePosition", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackCurrentBPM() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/CurrentBPM", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackCurrentKeyIndex() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/CurrentKeyIndex", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackCurrentLoopInPosition() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/CurrentLoopInPosition", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackCurrentLoopOutPosition() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/CurrentLoopOutPosition", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackCurrentLoopSizeInBeats() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/CurrentLoopSizeInBeats", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackKeyLock() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/KeyLock", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackLoopEnableState() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/LoopEnableState", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackPlayPauseLEDState() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/PlayPauseLEDState", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackSampleRate() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/SampleRate", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackSongAnalyzed() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/SongAnalyzed", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackSongLoaded() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/SongLoaded", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackSongName() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/SongName", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackSoundSwitchGuid() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/SoundSwitchGuid", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackTrackBytes() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/TrackBytes", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackTrackData() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/TrackData", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackTrackLength() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/TrackLength", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackTrackName() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/TrackName", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackTrackNetworkPath() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/TrackNetworkPath", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackTrackUri() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/TrackUri", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackTrackWasPlayed() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/TrackWasPlayed", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackLoopQuickLoop1() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/Loop/QuickLoop1", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackLoopQuickLoop2() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/Loop/QuickLoop2", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackLoopQuickLoop3() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/Loop/QuickLoop3", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackLoopQuickLoop4() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/Loop/QuickLoop4", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackLoopQuickLoop5() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/Loop/QuickLoop5", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackLoopQuickLoop6() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/Loop/QuickLoop6", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackLoopQuickLoop7() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/Loop/QuickLoop7", n.DeckIndex)
+}
+
+func (n *DeckValueNames) TrackLoopQuickLoop8() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/Loop/QuickLoop8", n.DeckIndex)
+}
+
+func (n *DeckValueNames) CurrentBPM() string {
+	return fmt.Sprintf("/Engine/Deck%d/CurrentBPM", n.DeckIndex)
+}
+
+func (n *DeckValueNames) DeckIsMaster() string {
+	return fmt.Sprintf("/Engine/Deck%d/DeckIsMaster", n.DeckIndex)
+}
+
+func (n *DeckValueNames) ExternalMixerVolume() string {
+	return fmt.Sprintf("/Engine/Deck%d/ExternalMixerVolume", n.DeckIndex)
+}
+
+func (n *DeckValueNames) ExternalScratchWheelTouch() string {
+	return fmt.Sprintf("/Engine/Deck%d/ExternalScratchWheelTouch", n.DeckIndex)
+}
+
+func (n *DeckValueNames) Play() string {
+	return fmt.Sprintf("/Engine/Deck%d/Play", n.DeckIndex)
+}
+
+func (n *DeckValueNames) PlayState() string {
+	return fmt.Sprintf("/Engine/Deck%d/PlayState", n.DeckIndex)
+}
+
+func (n *DeckValueNames) PlayStatePath() string {
+	return fmt.Sprintf("/Engine/Deck%d/PlayStatePath", n.DeckIndex)
+}
+
+func (n *DeckValueNames) Speed() string {
+	return fmt.Sprintf("/Engine/Deck%d/Speed", n.DeckIndex)
+}
+
+func (n *DeckValueNames) SpeedNeutral() string {
+	return fmt.Sprintf("/Engine/Deck%d/SpeedNeutral", n.DeckIndex)
+}
+
+func (n *DeckValueNames) SpeedOffsetDown() string {
+	return fmt.Sprintf("/Engine/Deck%d/SpeedOffsetDown", n.DeckIndex)
+}
+
+func (n *DeckValueNames) SpeedOffsetUp() string {
+	return fmt.Sprintf("/Engine/Deck%d/SpeedOffsetUp", n.DeckIndex)
+}
+
+func (n *DeckValueNames) SpeedRange() string {
+	return fmt.Sprintf("/Engine/Deck%d/SpeedRange", n.DeckIndex)
+}
+
+func (n *DeckValueNames) SpeedState() string {
+	return fmt.Sprintf("/Engine/Deck%d/SpeedState", n.DeckIndex)
+}
+
+func (n *DeckValueNames) SyncMode() string {
+	return fmt.Sprintf("/Engine/Deck%d/SyncMode", n.DeckIndex)
+}
