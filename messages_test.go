@@ -9,11 +9,13 @@ import (
 )
 
 var testMessages = []struct {
+	Name          string
 	Message       message
 	CreateMessage func() message
 	Bytes         []byte
 }{
 	{
+		Name: "Discovery",
 		Bytes: []byte{
 			0x61, 0x69, 0x72, 0x44, 0xf4, 0x05, 0xdc, 0x14,
 			0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c,
@@ -42,6 +44,7 @@ var testMessages = []struct {
 		},
 	},
 	{
+		Name: "Service announcement",
 		Bytes: []byte{
 			0x00, 0x00, 0x00, 0x00, 0x52, 0x3e, 0x67, 0x9d,
 			0xa4, 0x18, 0x4d, 0x1e, 0x83, 0xd0, 0xc7, 0x52,
@@ -60,6 +63,7 @@ var testMessages = []struct {
 		},
 	},
 	{
+		Name: "Services request",
 		Bytes: []byte{
 			0x00, 0x00, 0x00, 0x02, 0xf4, 0x05, 0xdc, 0x14,
 			0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c,
@@ -73,6 +77,7 @@ var testMessages = []struct {
 		},
 	},
 	{
+		Name: "Reference",
 		Bytes: []byte{
 			0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -101,6 +106,7 @@ var testMessages = []struct {
 	// 	},
 	// },
 	{
+		Name: "State subscribe",
 		Bytes: []byte{
 			0x00, 0x00, 0x00, 0x44, 0x73, 0x6d, 0x61, 0x61,
 			0x00, 0x00, 0x07, 0xd2, 0x00, 0x00, 0x00, 0x34,
@@ -118,6 +124,7 @@ var testMessages = []struct {
 		},
 	},
 	{
+		Name: "State emit",
 		Bytes: []byte{
 			0x00, 0x00, 0x00, 0x72, 0x73, 0x6d, 0x61, 0x61,
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x34,
@@ -142,6 +149,7 @@ var testMessages = []struct {
 		},
 	},
 	{
+		Name: "Beat info start stream",
 		Bytes: []byte{
 			0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
 		},
@@ -149,6 +157,7 @@ var testMessages = []struct {
 		Message:       &beatInfoStartStreamMessage{},
 	},
 	{
+		Name: "Beat info stop stream",
 		Bytes: []byte{
 			0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x01,
 		},
@@ -156,6 +165,7 @@ var testMessages = []struct {
 		Message:       &beatInfoStopStreamMessage{},
 	},
 	{
+		Name: "Beat emit",
 		Bytes: []byte{
 			0x00, 0x00, 0x00, 0x90, 0x00, 0x00, 0x00, 0x02,
 			0x00, 0x00, 0x06, 0x73, 0xfc, 0x64, 0x81, 0xac,
@@ -208,32 +218,38 @@ var testMessages = []struct {
 }
 
 func Test_Messages_Read(t *testing.T) {
-	for i, def := range testMessages {
-		t.Logf("Message index %d", i)
-		r := bytes.NewReader(def.Bytes)
-		m := def.CreateMessage()
-		err := m.readFrom(r)
-		require.Nil(t, err)
-		require.Equal(t, def.Message, m)
+	for _, test := range testMessages {
+		def := test
+		t.Run(test.Name, func(t *testing.T) {
+			r := bytes.NewReader(def.Bytes)
+			m := def.CreateMessage()
+			err := m.readFrom(r)
+			require.NoError(t, err)
+			require.Equal(t, def.Message, m)
+		})
 	}
 }
 
 func Test_Messages_Write(t *testing.T) {
-	for i, def := range testMessages {
-		t.Logf("Message index %d", i)
-		buf := new(bytes.Buffer)
-		err := def.Message.writeTo(buf)
-		require.Nil(t, err)
-		resultBytes := buf.Bytes()
-		require.Equal(t, def.Bytes, resultBytes)
+	for _, test := range testMessages {
+		def := test
+		t.Run(test.Name, func(t *testing.T) {
+			buf := new(bytes.Buffer)
+			err := def.Message.writeTo(buf)
+			require.NoError(t, err)
+			resultBytes := buf.Bytes()
+			require.Equal(t, def.Bytes, resultBytes)
+		})
 	}
 }
 
 func Test_Messages_CheckMatch(t *testing.T) {
-	for i, def := range testMessages {
-		t.Logf("Message index %d", i)
-		ok, err := def.Message.checkMatch(bufio.NewReader(bytes.NewReader(def.Bytes)))
-		require.Nil(t, err)
-		require.True(t, ok)
+	for _, test := range testMessages {
+		def := test
+		t.Run(test.Name, func(t *testing.T) {
+			ok, err := def.Message.checkMatch(bufio.NewReader(bytes.NewReader(def.Bytes)))
+			require.NoError(t, err)
+			require.True(t, ok)
+		})
 	}
 }
