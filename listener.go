@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/icedream/go-stagelinq/internal/messages"
 	"github.com/icedream/go-stagelinq/internal/socket"
 )
 
@@ -133,14 +134,14 @@ func (l *Listener) announce(action discovererMessageAction) (err error) {
 		Source:          l.name,
 		SoftwareName:    l.softwareName,
 		SoftwareVersion: l.softwareVersion,
-		tokenPrefixedMessage: tokenPrefixedMessage{
-			Token: l.token,
+		TokenPrefixedMessage: messages.TokenPrefixedMessage{
+			Token: messages.Token(l.token),
 		},
 		Action: action,
 		Port:   l.port,
 	}
 	b := new(bytes.Buffer)
-	err = m.writeTo(b)
+	err = m.WriteMessageTo(b)
 	if err != nil {
 		return
 	}
@@ -194,7 +195,7 @@ readLoop:
 		// decode message
 		r := bytes.NewReader(b)
 		m := new(discoveryMessage)
-		if err = m.readFrom(r); err != nil {
+		if err = m.ReadMessageFrom(r); err != nil {
 			return
 		}
 
@@ -253,7 +254,7 @@ func ListenWithConfiguration(listenerConfig *ListenerConfiguration) (listener *L
 
 	// We are setting up a shared UDP address socket here to allow other applications to still listen for StagelinQ discovery messages
 	config := &net.ListenConfig{
-		Control: setSocketControlForReusePort,
+		Control: socket.SetSocketControlForReusePort,
 	}
 	packetConn, err := config.ListenPacket(ctx, stagelinqDiscoveryNetwork, stagelinqDiscoveryAddressString)
 	if err != nil {

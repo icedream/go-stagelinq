@@ -36,7 +36,7 @@ func Test_MakeBroadcastIP(t *testing.T) {
 	}
 
 	for _, testValue := range testValues {
-		require.Equal(t, testValue.ExpectedValue, makeBroadcastIP(
+		require.Equal(t, testValue.ExpectedValue, MakeBroadcastIP(
 			testValue.IP,
 			testValue.Mask,
 		))

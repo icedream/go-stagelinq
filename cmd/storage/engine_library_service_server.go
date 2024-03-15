@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"log"
 	"math"
 	"strconv"
 
@@ -15,31 +16,40 @@ import (
 
 var _ enginelibrary.EngineLibraryServiceServer = &EngineLibraryServiceServer{}
 
+// EngineLibraryServiceServer is an example library service server
+// implementation.
+//
+// It will provide a the demo audio file as if contained in a library with
+// playlists. Some functions not needed for the task are left unimplemented.
 type EngineLibraryServiceServer struct {
 	enginelibrary.UnimplementedEngineLibraryServiceServer
 }
 
 // EventStream implements enginelibrary.EngineLibraryServiceServer.
 func (e *EngineLibraryServiceServer) EventStream(ctx context.Context, req *enginelibrary.EventStreamRequest) (*enginelibrary.EventStreamResponse, error) {
+	log.Printf("EventStream: %+v", req)
 	return &enginelibrary.EventStreamResponse{
 		Event: []*enginelibrary.Event{},
 	}, nil
 }
 
 // GetCredentials implements enginelibrary.EngineLibraryServiceServer.
-func (e *EngineLibraryServiceServer) GetCredentials(context.Context, *enginelibrary.GetCredentialsRequest) (*enginelibrary.GetCredentialsResponse, error) {
+func (e *EngineLibraryServiceServer) GetCredentials(ctx context.Context, req *enginelibrary.GetCredentialsRequest) (*enginelibrary.GetCredentialsResponse, error) {
+	log.Printf("GetCredentials: %+v", req)
 	panic("unimplemented")
 }
 
 // GetHistoryPlayedTracks implements enginelibrary.EngineLibraryServiceServer.
-func (e *EngineLibraryServiceServer) GetHistoryPlayedTracks(context.Context, *enginelibrary.GetHistoryPlayedTracksRequest) (*enginelibrary.GetHistoryPlayedTracksResponse, error) {
+func (e *EngineLibraryServiceServer) GetHistoryPlayedTracks(ctx context.Context, req *enginelibrary.GetHistoryPlayedTracksRequest) (*enginelibrary.GetHistoryPlayedTracksResponse, error) {
+	log.Printf("GetHistoryPlayedTracks: %+v", req)
 	return &enginelibrary.GetHistoryPlayedTracksResponse{
 		Tracks: []*enginelibrary.HistoryPlayedTrack{},
 	}, nil
 }
 
 // GetHistorySessions implements enginelibrary.EngineLibraryServiceServer.
-func (e *EngineLibraryServiceServer) GetHistorySessions(context.Context, *enginelibrary.GetHistorySessionsRequest) (*enginelibrary.GetHistorySessionsResponse, error) {
+func (e *EngineLibraryServiceServer) GetHistorySessions(ctx context.Context, req *enginelibrary.GetHistorySessionsRequest) (*enginelibrary.GetHistorySessionsResponse, error) {
+	log.Printf("GetHistorySessions: %+v", req)
 	return &enginelibrary.GetHistorySessionsResponse{
 		Sessions: []*enginelibrary.HistorySession{},
 	}, nil
@@ -47,6 +57,7 @@ func (e *EngineLibraryServiceServer) GetHistorySessions(context.Context, *engine
 
 // GetLibraries implements enginelibrary.EngineLibraryServiceServer.
 func (e *EngineLibraryServiceServer) GetLibraries(ctx context.Context, req *enginelibrary.GetLibrariesRequest) (*enginelibrary.GetLibrariesResponse, error) {
+	log.Printf("GetLibraries: %+v", req)
 	return &enginelibrary.GetLibrariesResponse{
 		Libraries: []*enginelibrary.Library{
 			{
@@ -59,8 +70,9 @@ func (e *EngineLibraryServiceServer) GetLibraries(ctx context.Context, req *engi
 
 // GetLibrary implements enginelibrary.EngineLibraryServiceServer.
 func (e *EngineLibraryServiceServer) GetLibrary(ctx context.Context, req *enginelibrary.GetLibraryRequest) (*enginelibrary.GetLibraryResponse, error) {
+	log.Printf("GetLibrary: %+v", req)
 	switch req.GetLibraryId() {
-	case demoLibrary:
+	case "", demoLibrary:
 		return &enginelibrary.GetLibraryResponse{
 			Playlists: []*enginelibrary.PlaylistMetadata{
 				{
@@ -79,6 +91,7 @@ func (e *EngineLibraryServiceServer) GetLibrary(ctx context.Context, req *engine
 
 // GetSearchFilters implements enginelibrary.EngineLibraryServiceServer.
 func (e *EngineLibraryServiceServer) GetSearchFilters(ctx context.Context, req *enginelibrary.GetSearchFiltersRequest) (*enginelibrary.GetSearchFiltersResponse, error) {
+	log.Printf("GetSearchFilters: %+v", req)
 	resp := &enginelibrary.GetSearchFiltersResponse{
 		SearchFilters: &enginelibrary.SearchFilterOptions{},
 	}
@@ -143,26 +156,40 @@ func generateDemoTrackMetadata(trackID string) *enginelibrary.TrackMetadata {
 	return &metadata
 }
 
+var unsetFloat64 float64 = -1
+
 // GetTrack implements enginelibrary.EngineLibraryServiceServer.
 func (e *EngineLibraryServiceServer) GetTrack(ctx context.Context, req *enginelibrary.GetTrackRequest) (*enginelibrary.GetTrackResponse, error) {
-	if req.GetLibraryId() != demoLibrary && req.LibraryId != nil {
+	log.Printf("GetTrack: %+v", req)
+	if len(req.GetLibraryId()) != 0 && req.GetLibraryId() != demoLibrary {
 		return nil, status.Error(codes.NotFound, "library not found")
 	}
 
 	for _, trackID := range demoTrackIDs {
+		metadata := generateDemoTrackMetadata(trackID)
 		if trackID == req.GetTrackId() {
-			return &enginelibrary.GetTrackResponse{
+			resp := &enginelibrary.GetTrackResponse{
 				Blob: &enginelibrary.TrackBlob{
 					Type: &enginelibrary.TrackBlob_Url{
 						Url: &enginelibrary.TrackBlobUrl{
-							Url:      &demoTrackURL,
+							Url:      &demoTrackURLGRPC,
 							FileSize: &demoTrackLength,
 						},
 					},
 				},
-				Metadata:        generateDemoTrackMetadata(trackID),
-				PerformanceData: nil, // TODO
-			}, nil
+				Metadata: generateDemoTrackMetadata(trackID),
+				PerformanceData: &enginelibrary.TrackPerformanceData{
+					Bpm:      metadata.Bpm,
+					BeatGrid: demoBeatGrid,
+					MainCue: &enginelibrary.MainCue{
+						Position:        &unsetFloat64,
+						InitialPosition: &unsetFloat64,
+					},
+					OverviewWaveform: demoOverviewWaveform,
+				},
+			}
+			log.Printf("=> Found demo track ID: %+v", resp)
+			return resp, nil
 		}
 	}
 
@@ -171,21 +198,31 @@ func (e *EngineLibraryServiceServer) GetTrack(ctx context.Context, req *engineli
 
 // GetTracks implements enginelibrary.EngineLibraryServiceServer.
 func (e *EngineLibraryServiceServer) GetTracks(ctx context.Context, req *enginelibrary.GetTracksRequest) (*enginelibrary.GetTracksResponse, error) {
-	switch req.GetLibraryId() {
-	case "", demoLibrary:
+	log.Printf("GetTracks: %+v", req)
+	switch {
+	case req.GetPlaylistId() == demoPlaylist: // specific playlist
 		resp := &enginelibrary.GetTracksResponse{
 			Tracks: []*enginelibrary.ListTrack{},
 		}
 		for _, trackID := range demoTrackIDs {
 			resp.Tracks = append(resp.Tracks, &enginelibrary.ListTrack{
 				Metadata:       generateDemoTrackMetadata(trackID),
-				PreviewArtwork: demoTrackArtwork,
+				PreviewArtwork: demoTrackPreviewArtwork,
 			})
 		}
-		return &enginelibrary.GetTracksResponse{
+		return resp, nil
+	case req.GetLibraryId() == "" || req.GetLibraryId() == demoLibrary: // specific or default library
+		resp := &enginelibrary.GetTracksResponse{
 			Tracks: []*enginelibrary.ListTrack{},
-		}, nil
-	default:
+		}
+		for _, trackID := range demoTrackIDs {
+			resp.Tracks = append(resp.Tracks, &enginelibrary.ListTrack{
+				Metadata:       generateDemoTrackMetadata(trackID),
+				PreviewArtwork: demoTrackPreviewArtwork,
+			})
+		}
+		return resp, nil
+	default: // neither playlist nor library match
 		return &enginelibrary.GetTracksResponse{
 			Tracks: []*enginelibrary.ListTrack{},
 		}, nil
@@ -194,11 +231,13 @@ func (e *EngineLibraryServiceServer) GetTracks(ctx context.Context, req *enginel
 
 // PutEvents implements enginelibrary.EngineLibraryServiceServer.
 func (e *EngineLibraryServiceServer) PutEvents(ctx context.Context, req *enginelibrary.PutEventsRequest) (*enginelibrary.PutEventsResponse, error) {
+	log.Printf("PutEvents: %+v", req)
 	return &enginelibrary.PutEventsResponse{}, nil
 }
 
 // SearchTracks implements enginelibrary.EngineLibraryServiceServer.
 func (e *EngineLibraryServiceServer) SearchTracks(ctx context.Context, req *enginelibrary.SearchTracksRequest) (*enginelibrary.SearchTracksResponse, error) {
+	log.Printf("SearchTracks: %+v", req)
 	resp := &enginelibrary.SearchTracksResponse{
 		Tracks: []*enginelibrary.ListTrack{},
 	}
@@ -261,7 +300,7 @@ trackLoop:
 		}
 		resp.Tracks = append(resp.Tracks, &enginelibrary.ListTrack{
 			Metadata:       metadata,
-			PreviewArtwork: demoTrackArtwork,
+			PreviewArtwork: demoTrackPreviewArtwork,
 		})
 	}
 	return resp, nil

@@ -4,6 +4,8 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"github.com/icedream/go-stagelinq/internal/messages"
 )
 
 // Service contains information about a data service a device provides.
@@ -29,7 +31,7 @@ type MainConnection struct {
 	reference int64
 }
 
-var mainConnectionMessageSet = newDeviceConnMessageSet([]message{
+var mainConnectionMessageSet = newDeviceConnMessageSet([]messages.Message{
 	&serviceAnnouncementMessage{},
 	&referenceMessage{},
 	&servicesRequestMessage{},
@@ -55,10 +57,10 @@ func newMainConnection(conn net.Conn, token Token, targetToken Token, offeredSer
 			ref := mainConn.reference
 			mainConn.lock.Unlock()
 			if err = mainConn.msgConn.WriteMessage(&referenceMessage{
-				tokenPrefixedMessage: tokenPrefixedMessage{
-					Token: mainConn.token,
+				TokenPrefixedMessage: messages.TokenPrefixedMessage{
+					Token: messages.Token(mainConn.token),
 				},
-				Token2:    targetToken,
+				Token2:    messages.Token(targetToken),
 				Reference: ref,
 			}); err != nil {
 				return
@@ -79,7 +81,7 @@ func newMainConnection(conn net.Conn, token Token, targetToken Token, offeredSer
 			}
 		}()
 		for {
-			var msg message
+			var msg messages.Message
 			msg, err = mainConn.msgConn.ReadMessage()
 			if err != nil {
 				return
@@ -157,8 +159,8 @@ func (conn *MainConnection) RequestServices() (retval []*Service, err error) {
 
 func (conn *MainConnection) requestServices() (err error) {
 	if err = conn.msgConn.WriteMessage(&servicesRequestMessage{
-		tokenPrefixedMessage: tokenPrefixedMessage{
-			Token: conn.token,
+		TokenPrefixedMessage: messages.TokenPrefixedMessage{
+			Token: messages.Token(conn.token),
 		},
 	}); err != nil {
 		return
@@ -169,8 +171,8 @@ func (conn *MainConnection) requestServices() (err error) {
 // announceService tells the device about a service we provide.
 func (conn *MainConnection) announceService(name string, port uint16) error {
 	return conn.msgConn.WriteMessage(&serviceAnnouncementMessage{
-		tokenPrefixedMessage: tokenPrefixedMessage{
-			Token: conn.token,
+		TokenPrefixedMessage: messages.TokenPrefixedMessage{
+			Token: messages.Token(conn.token),
 		},
 		Service: name,
 		Port:    port,

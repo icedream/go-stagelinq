@@ -3,6 +3,7 @@ package stagelinq
 import (
 	"net"
 
+	"github.com/icedream/go-stagelinq/internal/messages"
 	"github.com/icedream/go-stagelinq/internal/socket"
 )
 
@@ -20,7 +21,7 @@ type BeatInfoConnection struct {
 	beatInfoC chan *BeatInfo
 }
 
-var beatInfoConnectionMessageSet = newDeviceConnMessageSet([]message{&beatEmitMessage{}})
+var beatInfoConnectionMessageSet = newDeviceConnMessageSet([]messages.Message{&beatEmitMessage{}})
 
 func NewBeatInfoConnection(conn net.Conn, token Token) (bic *BeatInfoConnection, err error) {
 	msgConn := newMessageConnection(conn, beatInfoConnectionMessageSet)
@@ -36,8 +37,8 @@ func NewBeatInfoConnection(conn net.Conn, token Token) (bic *BeatInfoConnection,
 
 	// perform in-protocol service request
 	msgConn.WriteMessage(&serviceAnnouncementMessage{
-		tokenPrefixedMessage: tokenPrefixedMessage{
-			Token: token,
+		TokenPrefixedMessage: messages.TokenPrefixedMessage{
+			Token: messages.Token(token),
 		},
 		Service: "BeatInfo",
 		Port:    socket.GetPort(conn.LocalAddr()),
@@ -53,7 +54,7 @@ func NewBeatInfoConnection(conn net.Conn, token Token) (bic *BeatInfoConnection,
 			close(beatInfoConn.beatInfoC)
 		}()
 		for {
-			var msg message
+			var msg messages.Message
 			msg, err = msgConn.ReadMessage()
 			if err != nil {
 				return

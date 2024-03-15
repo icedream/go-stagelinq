@@ -7,13 +7,15 @@ import (
 	"fmt"
 	"net"
 	"reflect"
+
+	"github.com/icedream/go-stagelinq/internal/messages"
 )
 
 type messageSet struct {
 	messages []reflect.Type
 }
 
-func newDeviceConnMessageSet(messageObjects []message) *messageSet {
+func newDeviceConnMessageSet(messageObjects []messages.Message) *messageSet {
 	messages := make([]reflect.Type, len(messageObjects))
 	for i, messageObject := range messageObjects {
 		// .Elem() because type will be a pointer-to-type but we want to create instances of the type itself later
@@ -49,11 +51,11 @@ func newMessageConnection(conn net.Conn, expectedMessages *messageSet) *messageC
 	}
 }
 
-func (s *messageConnection) WriteMessage(msg message) (err error) {
+func (s *messageConnection) WriteMessage(msg messages.Message) (err error) {
 	buf := new(bytes.Buffer)
 
 	// write message parts into buffer
-	if err = msg.writeTo(buf); err != nil {
+	if err = msg.WriteMessageTo(buf); err != nil {
 		return
 	}
 
@@ -67,12 +69,12 @@ func (s *messageConnection) WriteMessage(msg message) (err error) {
 	return
 }
 
-func (s *messageConnection) ReadMessage() (msg message, err error) {
-	var targetMsg message
+func (s *messageConnection) ReadMessage() (msg messages.Message, err error) {
+	var targetMsg messages.Message
 	var ok bool
 	for _, messageType := range s.expectedMessages.Messages() {
-		targetMsg = reflect.New(messageType).Interface().(message)
-		ok, err = targetMsg.checkMatch(s.bufferedReader)
+		targetMsg = reflect.New(messageType).Interface().(messages.Message)
+		ok, err = targetMsg.CheckMatch(s.bufferedReader)
 		if err != nil {
 			return
 		}
@@ -87,7 +89,7 @@ func (s *messageConnection) ReadMessage() (msg message, err error) {
 		return
 	}
 
-	err = targetMsg.readFrom(s.bufferedReader)
+	err = targetMsg.ReadMessageFrom(s.bufferedReader)
 	if err == nil {
 		msg = targetMsg
 		// log.Printf("RECV: %s", spew.Sdump(msg))
