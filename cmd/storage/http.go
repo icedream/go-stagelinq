@@ -5,12 +5,15 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func newHTTPServiceHandler() http.Handler {
-	mux := http.NewServeMux()
-	mux.Handle("/download/{path}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requestedPath := r.PathValue("path")
+	r := mux.NewRouter()
+	r.Get("/download/{path}").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		requestedPath := vars["path"]
 		if requestedPath != demoTrackURL {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -19,9 +22,9 @@ func newHTTPServiceHandler() http.Handler {
 		w.WriteHeader(http.StatusOK)
 		f := bytes.NewReader(demoTrackBytes)
 		io.Copy(w, f)
-	}))
-	mux.Handle("/ping", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	})
+	r.Get("/ping").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-	}))
-	return mux
+	})
+	return r
 }
