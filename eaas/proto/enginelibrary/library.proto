@@ -1,0 +1,200 @@
+syntax = "proto3";
+
+package enginelibrary.v1;
+
+option go_package = "github.com/icedream/go-stagelinq/eaas/proto/enginelibrary";
+
+import "google/protobuf/timestamp.proto";
+
+enum BlobProviderType {
+  BLOB_PROVIDER_TYPE_UNSPECIFIED = 0;
+  BLOB_PROVIDER_TYPE_ENGINE_DIRECT = 1;
+  BLOB_PROVIDER_TYPE_ENGINE_CONNECT = 2;
+  BLOB_PROVIDER_TYPE_DROPBOX = 3;
+  BLOB_PROVIDER_TYPE_GOOGLE_DRIVE = 4;
+  BLOB_PROVIDER_TYPE_ONEDRIVE = 5;
+}
+
+enum BlobType {
+  BLOB_TYPE_UNSPECIFIED = 0;
+  BLOB_TYPE_TRACK_AUDIO = 1;
+}
+
+enum InitialImportSource {
+  INITIAL_IMPORT_SOURCE_UNSPECIFIED = 0;
+  INITIAL_IMPORT_SOURCE_SERATO = 1;
+  INITIAL_IMPORT_SOURCE_REKORDBOX = 2;
+  INITIAL_IMPORT_SOURCE_TRAKTOR = 3;
+}
+
+enum LibraryLogo {
+  LIBRARY_LOGO_UNSPECIFIED = 0;
+  LIBRARY_LOGO_ENGINE = 1;
+  LIBRARY_LOGO_APPLE_MUSIC_APP = 2;
+  LIBRARY_LOGO_REKORDBOX = 3;
+  LIBRARY_LOGO_SERATO = 4;
+  LIBRARY_LOGO_TRAKTOR = 5;
+}
+
+enum ListType {
+  LIST_TYPE_UNSPECIFIED = 0;
+  LIST_TYPE_PLAY = 1;
+  LIST_TYPE_SMART = 2;
+}
+
+message BlobProvider {
+  optional BlobProviderType type = 1;
+  optional string id = 2;
+}
+
+message Color {
+  optional uint32 r = 1;
+  optional uint32 g = 2;
+  optional uint32 b = 3;
+  optional uint32 a = 4;
+}
+
+message Credentials { optional string access_token = 1; }
+
+message HistorySession {
+  optional string id = 1;
+  optional string title = 2;
+  optional uint64 title_event_id = 5;
+  optional google.protobuf.Timestamp start_time = 3;
+  optional string timezone = 4;
+  optional uint64 deleted_by_event_id = 6;
+  optional uint32 estimated_duration_seconds = 7;
+  optional uint32 played_track_count = 8;
+}
+
+message HistoryPlayedTrack {
+  optional uint64 created_by_event_id = 1;
+  optional PlayedTrack played_track = 2;
+  optional uint64 deleted_by_event_id = 3;
+}
+
+message Library {
+  optional string id = 1;
+  optional string title = 2;
+  optional LibraryLogo logo = 3;
+}
+
+message ListTrack {
+  optional TrackMetadata metadata = 1;
+  optional bytes preview_artwork = 4;
+}
+
+message Loop {
+  // TODO - oneof _loop_in {
+  double loop_in = 2;
+  // }
+  // TODO - oneof _loop_out {
+  double loop_out = 3;
+  // }
+  optional string name = 1;
+  optional Color color = 4;
+  optional bool active_on_load = 5;
+}
+
+message MainCue {
+  optional double position = 1;
+  optional bool is_set_manually = 2;
+  optional double initial_position = 3;
+}
+
+message PlayedTrack {
+  optional string played_track_id = 1;
+  optional TrackMetadata metadata = 2;
+  optional google.protobuf.Timestamp start_time = 3;
+}
+
+message PlaylistMetadata {
+  optional string id = 1;
+  optional string title = 2;
+  optional uint32 track_count = 3;
+  repeated PlaylistMetadata playlists = 4;
+  optional ListType list_type = 5;
+}
+
+message QuickCue {
+  optional string name = 1;
+  optional double position = 2;
+  optional Color color = 3;
+}
+
+message SearchFilterValue { optional string value = 1; }
+
+message SearchFilterOptions {
+  repeated SearchFilterValue genres = 1;
+  repeated SearchFilterValue artists = 2;
+  repeated SearchFilterValue albums = 3;
+  repeated SearchFilterValue bpms = 4;
+  repeated SearchFilterValue keys = 5;
+}
+
+message Track {
+  optional TrackMetadata metadata = 1;
+  optional TrackPerformanceData performance_data = 2;
+  optional TrackLocation location = 3;
+}
+
+message TrackBlob {
+  oneof type { TrackBlobUrl url = 1; }
+}
+
+message TrackBlobUrl {
+  optional string url = 1;
+  optional uint32 file_size = 2;
+}
+
+message TrackPerformanceData {
+  message QuickCuesEntry {
+    optional uint32 key = 1;
+    optional QuickCue value = 2;
+  }
+
+  message LoopsEntry {
+    optional uint32 key = 1;
+    optional Loop value = 2;
+  }
+
+  // TODO - oneof _initial_import_source {
+  optional InitialImportSource initial_import_source = 8;
+  // }
+  // TODO - oneof _bpm {
+  optional double bpm = 9;
+  //}
+  optional string id = 1;
+  optional bytes beat_grid = 3;
+  repeated QuickCuesEntry quick_cues = 4;
+  repeated LoopsEntry loops = 5;
+  optional MainCue main_cue = 6;
+  optional bytes overview_waveform = 7;
+}
+
+message TrackMetadata {
+  // TODO - oneof _bpm {
+  optional double bpm = 6;
+  //}
+  // TODO - oneof _date_added {
+  optional google.protobuf.Timestamp date_added = 16;
+  //}
+  optional string id = 1;
+  optional string title = 3;
+  optional string artist = 4;
+  optional string album = 5;
+  optional string key = 7;
+  optional uint32 rating = 8;
+  optional uint32 year = 9;
+  optional string genre = 10;
+  optional string comment = 11;
+  optional string label = 12;
+  optional uint32 length_seconds = 13;
+  optional string composer = 14;
+  optional string remixer = 15;
+}
+
+message TrackLocation {
+  optional BlobProvider provider = 1;
+  optional string key = 2;
+}

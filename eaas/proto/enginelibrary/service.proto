@@ -1,0 +1,173 @@
+syntax = "proto3";
+
+package enginelibrary.v1;
+
+option go_package = "github.com/icedream/go-stagelinq/eaas/proto/enginelibrary";
+
+import "proto/enginelibrary/events.proto";
+import "proto/enginelibrary/library.proto";
+
+enum SearchFilterField {
+  SEARCH_FILTER_FIELD_UNSPECIFIED = 0;
+  SEARCH_FILTER_FIELD_GENRE = 1;
+  SEARCH_FILTER_FIELD_ARTIST = 2;
+  SEARCH_FILTER_FIELD_ALBUM = 3;
+  SEARCH_FILTER_FIELD_BPM = 4;
+  SEARCH_FILTER_FIELD_KEY = 5;
+}
+
+enum SearchQueryField {
+  SEARCH_QUERY_FIELD_UNSPECIFIED = 0;
+  SEARCH_QUERY_FIELD_TITLE = 1;
+  SEARCH_QUERY_FIELD_ARTIST = 2;
+  SEARCH_QUERY_FIELD_ALBUM = 3;
+  SEARCH_QUERY_FIELD_LENGTH = 4;
+  SEARCH_QUERY_FIELD_KEY = 5;
+  SEARCH_QUERY_FIELD_COMMENT = 6;
+  SEARCH_QUERY_FIELD_BPM = 7;
+  SEARCH_QUERY_FIELD_GENRE = 8;
+  SEARCH_QUERY_FIELD_LABEL = 9;
+  SEARCH_QUERY_FIELD_YEAR = 10;
+  SEARCH_QUERY_FIELD_DATE_ADDED = 11;
+  SEARCH_QUERY_FIELD_FILENAME = 12;
+}
+
+enum SortField {
+  SORT_FIELD_UNSPECIFIED = 0;
+  SORT_FIELD_TITLE = 1;
+  SORT_FIELD_ARTIST = 2;
+  SORT_FIELD_ALBUM = 3;
+  SORT_FIELD_BPM = 4;
+  SORT_FIELD_GENRE = 5;
+  SORT_FIELD_COMMENT = 6;
+  SORT_FIELD_LABEL = 7;
+  SORT_FIELD_LENGTH = 8;
+  SORT_FIELD_KEY = 9;
+  SORT_FIELD_RATING = 10;
+  SORT_FIELD_YEAR = 11;
+  SORT_FIELD_ORDER_PLAYLIST = 12;
+  SORT_FIELD_DATE_ADDED = 13;
+}
+
+enum SortDirection {
+  SORT_DIRECTION_UNSPECIFIED = 0;
+  SORT_DIRECTION_ASC = 1;
+  SORT_DIRECTION_DESC = 2;
+}
+
+message EventStreamRequest {
+  optional string library_id = 2;
+  optional string device_id = 3;
+}
+
+message EventStreamResponse { repeated Event event = 1; }
+
+message GetCredentialsRequest {
+  optional string library_id = 1;
+  optional BlobProviderType provider_type = 2;
+}
+
+message GetCredentialsResponse {
+  optional Credentials credentials = 1;
+  optional BlobProvider provider = 2;
+}
+
+message GetHistoryPlayedTracksRequest {
+  optional string library_id = 1;
+  optional string session_id = 2;
+}
+
+message GetHistoryPlayedTracksResponse {
+  repeated HistoryPlayedTrack tracks = 1;
+}
+
+message GetHistorySessionsRequest { optional string library_id = 1; }
+
+message GetHistorySessionsResponse { repeated HistorySession sessions = 1; }
+
+message GetLibrariesRequest {}
+
+message GetLibrariesResponse { repeated Library libraries = 1; }
+
+message GetLibraryRequest { optional string library_id = 1; }
+
+message GetLibraryResponse { repeated PlaylistMetadata playlists = 1; }
+
+message GetTracksRequest {
+  optional string library_id = 1;
+  optional string playlist_id = 2;
+  optional uint32 page_size = 3;
+  repeated Sort sort = 4;
+  optional ListType list_type = 5;
+  repeated SearchFilter filters = 6;
+}
+
+message GetTracksResponse { repeated ListTrack tracks = 1; }
+
+message GetSearchFiltersRequest {
+  // TODO - oneof _query was generated here, idk why yet
+  optional string query = 2;
+  optional string library_id = 1;
+  repeated SearchQueryField query_fields = 3;
+}
+
+message GetSearchFiltersResponse {
+  optional SearchFilterOptions search_filters = 1;
+}
+
+message GetTrackRequest {
+  optional string library_id = 1;
+  optional string track_id = 2;
+}
+
+message GetTrackResponse {
+  optional TrackBlob blob = 1;
+  optional TrackPerformanceData performance_data = 2;
+  optional TrackMetadata metadata = 3;
+}
+
+message PutEventsRequest {
+  optional string library_id = 1;
+  repeated Event events = 2;
+}
+
+message PutEventsResponse { optional uint64 latest_event_processed = 1; }
+
+message SearchFilter {
+  optional SearchFilterField field = 1;
+  repeated string value = 2;
+}
+
+message SearchTracksRequest {
+  optional string library_id = 1;
+  // TODO - oneof _query was generated here, idk why yet
+  optional string query = 2;
+  repeated SearchQueryField query_fields = 3;
+  repeated SearchFilter filters = 4;
+  optional uint32 page_size = 5;
+  repeated Sort sort = 6;
+}
+
+message SearchTracksResponse { repeated ListTrack tracks = 1; }
+
+message Sort {
+  optional SortField field = 1;
+  optional SortDirection direction = 2;
+}
+
+service EngineLibraryService {
+  rpc EventStream(EventStreamRequest) returns (EventStreamResponse);
+  rpc GetCredentials(GetCredentialsRequest) returns (GetCredentialsResponse);
+  rpc GetLibraries(GetLibrariesRequest) returns (GetLibrariesResponse);
+  rpc GetLibrary(GetLibraryRequest) returns (GetLibraryResponse);
+  rpc GetTracks(GetTracksRequest) returns (GetTracksResponse);
+  rpc GetSearchFilters(GetSearchFiltersRequest)
+      returns (GetSearchFiltersResponse);
+  rpc GetTrack(GetTrackRequest) returns (GetTrackResponse);
+  rpc GetHistoryPlayedTracks(GetHistoryPlayedTracksRequest)
+      returns (GetHistoryPlayedTracksResponse);
+  rpc GetHistorySessions(GetHistorySessionsRequest)
+      returns (GetHistorySessionsResponse);
+  rpc PutEvents(PutEventsRequest) returns (PutEventsResponse);
+  rpc SearchTracks(SearchTracksRequest) returns (SearchTracksResponse);
+}
