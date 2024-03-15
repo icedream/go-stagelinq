@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 )
 
@@ -209,9 +210,9 @@ func checkSmaa(r *bufio.Reader, id int32) (ok bool, err error) {
 }
 
 type stateSubscribeMessage struct {
-	//Length uint32
-	//Unknown []byte = {0x73,0x6d,0x61,0x61}
-	//Unknown2 []byte = {0x00,0x00,0x07,0xd2}
+	// Length uint32
+	// Unknown []byte = {0x73,0x6d,0x61,0x61}
+	// Unknown2 []byte = {0x00,0x00,0x07,0xd2}
 	Name     string
 	Interval uint32
 }
@@ -367,9 +368,9 @@ func (m *stateEmitResponseMessage) writeTo(w io.Writer) (err error) {
 }
 
 type stateEmitMessage struct {
-	//Length uint32
-	//Unknown []byte = {0x73,0x6d,0x61,0x61}
-	//Unknown2 []byte = {0x00,0x00,0x00,0x00}
+	// Length uint32
+	// Unknown []byte = {0x73,0x6d,0x61,0x61}
+	// Unknown2 []byte = {0x00,0x00,0x00,0x00}
 	Name string
 	JSON string
 }
@@ -466,8 +467,7 @@ func (m *stateEmitMessage) writeTo(w io.Writer) (err error) {
 
 var beatInfoStartStreamMagicBytes = []byte{0x0, 0x0, 0x0, 0x0}
 
-type beatInfoStartStreamMessage struct {
-}
+type beatInfoStartStreamMessage struct{}
 
 func (m *beatInfoStartStreamMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
 	// peek length bytes and magic bytes
@@ -533,8 +533,7 @@ func (m *beatInfoStartStreamMessage) writeTo(w io.Writer) (err error) {
 
 var beatInfoStopStreamMagicBytes = []byte{0x0, 0x0, 0x0, 0x1}
 
-type beatInfoStopStreamMessage struct {
-}
+type beatInfoStopStreamMessage struct{}
 
 func (m *beatInfoStopStreamMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
 	// peek length bytes and magic bytes
@@ -607,8 +606,8 @@ type PlayerInfo struct {
 }
 
 type beatEmitMessage struct {
-	//Length uint32
-	//Magic []byte = {0x00,0x00,0x00,0x02}
+	// Length uint32
+	// Magic []byte = {0x00,0x00,0x00,0x02}
 	Clock     uint64
 	Players   []PlayerInfo
 	Timelines []float64
@@ -846,4 +845,104 @@ func (m *discoveryMessage) writeTo(w io.Writer) (err error) {
 		return
 	}
 	return
+}
+
+var eaasDiscoveryMagic = []byte("EAAS")
+
+func checkEAASDiscoveryMagic(r *bufio.Reader, req [2]byte) (ok bool, err error) {
+	var readMagic []byte
+	if readMagic, err = r.Peek(6); err != nil {
+		return
+	}
+	ok = bytes.Equal(readMagic, append(eaasDiscoveryMagic, req[:]...))
+	return
+}
+
+type eaasDiscoveryRequestMessage struct{}
+
+func (m *eaasDiscoveryRequestMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
+	return checkEAASDiscoveryMagic(r, [2]byte{1, 0})
+}
+
+func (m *eaasDiscoveryRequestMessage) readFrom(r io.Reader) (err error) {
+	readMagic := make([]byte, 6)
+	if _, err = r.Read(readMagic); err != nil {
+		return err
+	} else if !bytes.Equal(readMagic, append(eaasDiscoveryMagic, 1, 0)) {
+		err = ErrInvalidMessageReceived
+	}
+	return err
+}
+
+func (m *eaasDiscoveryRequestMessage) writeTo(w io.Writer) (err error) {
+	_, err = w.Write(append(eaasDiscoveryMagic, 1, 0))
+	return err
+}
+
+type eaasDiscoveryResponseMessage struct {
+	tokenPrefixedMessage
+	Hostname        string
+	SoftwareVersion string
+	URL             string
+	Extra           string // usually just _
+}
+
+func (m *eaasDiscoveryResponseMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
+	return checkEAASDiscoveryMagic(r, [2]byte{1, 1})
+}
+
+func (m *eaasDiscoveryResponseMessage) readFrom(r io.Reader) (err error) {
+	readMagic := make([]byte, 6)
+	if _, err = r.Read(readMagic); err != nil {
+		return err
+	} else if !bytes.Equal(readMagic, append(eaasDiscoveryMagic, 1, 1)) {
+		err = ErrInvalidMessageReceived
+		return err
+	}
+	if err = m.tokenPrefixedMessage.readFrom(r); err != nil {
+		return fmt.Errorf("failed to read token: %w", err)
+	}
+	if err = readNetworkString(r, &m.Hostname); err != nil {
+		return fmt.Errorf("failed to read hostname string: %w", err)
+	}
+	if err = readLengthPrefixedNetworkString(r, &m.URL, utf8StringEncoding); err != nil {
+		return fmt.Errorf("failed to read URL string: %w", err)
+	}
+	if err = readNetworkString(r, &m.SoftwareVersion); err != nil {
+		return fmt.Errorf("failed to read software version string: %w", err)
+	}
+	// TODO - there is an extra 0x01 here which idk what to do with
+	if _, err = r.Read([]byte{0x01}); err != nil {
+		return err
+	}
+	// TODO - is this really a string?
+	if err = readNetworkString(r, &m.Extra); err != nil {
+		return fmt.Errorf("failed to read extra network string: %w", err)
+	}
+	return err
+}
+
+func (m *eaasDiscoveryResponseMessage) writeTo(w io.Writer) (err error) {
+	if _, err = w.Write(append(eaasDiscoveryMagic, 1, 1)); err != nil {
+		return fmt.Errorf("failed to write EAAS magic: %w", err)
+	}
+	if err = m.tokenPrefixedMessage.writeTo(w); err != nil {
+		return fmt.Errorf("failed to write token: %w", err)
+	}
+	if err = writeNetworkString(w, m.Hostname); err != nil {
+		return fmt.Errorf("failed to write hostname string: %w", err)
+	}
+	if err = writeLengthPrefixedNetworkString(w, m.URL, utf8StringEncoding); err != nil {
+		return fmt.Errorf("failed to write URL string: %w", err)
+	}
+	if err = writeNetworkString(w, m.SoftwareVersion); err != nil {
+		return fmt.Errorf("failed to write software version string: %w", err)
+	}
+	if _, err = w.Write([]byte{0x01}); err != nil {
+		return err
+	}
+	if err = writeNetworkString(w, m.Extra); err != nil {
+		return fmt.Errorf("failed to write extra network string: %w", err)
+	}
+	return err
 }
