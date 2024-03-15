@@ -1,10 +1,10 @@
-package stagelinq
+package socket
 
 import (
 	"net"
 )
 
-func getPort(address net.Addr) int {
+func GetPortFromAddress(address net.Addr) int {
 	switch convertedAddress := address.(type) {
 	case *net.UDPAddr:
 		return convertedAddress.Port
@@ -15,7 +15,7 @@ func getPort(address net.Addr) int {
 	}
 }
 
-func makeBroadcastIP(ip net.IP, mask net.IPMask) (bip net.IP) {
+func MakeBroadcastIP(ip net.IP, mask net.IPMask) (bip net.IP) {
 	// get 4-byte representation of ipv4 is possible, nil if not an ipv4 address
 	convertedIPv4 := false
 	if ip4 := ip.To4(); ip4 != nil {

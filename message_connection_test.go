@@ -4,20 +4,21 @@ import (
 	"net"
 	"testing"
 
+	"github.com/icedream/go-stagelinq/internal/messages"
 	"github.com/stretchr/testify/require"
 )
 
-var testToken = Token{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
+var testToken = messages.Token{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
 
 func Test_MessageConnection_Read(t *testing.T) {
 	testMessages := []struct {
-		Message message
+		Message messages.Message
 		Bytes   []byte
 	}{
 		{
 			Message: &serviceAnnouncementMessage{
-				tokenPrefixedMessage: tokenPrefixedMessage{
-					Token: Token{0xf4, 0x05, 0xdc, 0x14, 0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c, 0x49, 0x33, 0x52, 0x76},
+				TokenPrefixedMessage: messages.TokenPrefixedMessage{
+					Token: messages.Token{0xf4, 0x05, 0xdc, 0x14, 0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c, 0x49, 0x33, 0x52, 0x76},
 				},
 				Service: "StateMap",
 				Port:    0xb1d7,
@@ -39,8 +40,8 @@ func Test_MessageConnection_Read(t *testing.T) {
 		},
 		{
 			Message: &referenceMessage{
-				tokenPrefixedMessage: tokenPrefixedMessage{
-					Token: Token{0xf4, 0x05, 0xdc, 0x14, 0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c, 0x49, 0x33, 0x52, 0x76},
+				TokenPrefixedMessage: messages.TokenPrefixedMessage{
+					Token: messages.Token{0xf4, 0x05, 0xdc, 0x14, 0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c, 0x49, 0x33, 0x52, 0x76},
 				},
 				Reference: 0x000009ed4f310604,
 			},
@@ -61,8 +62,8 @@ func Test_MessageConnection_Read(t *testing.T) {
 		},
 		{
 			Message: &servicesRequestMessage{
-				tokenPrefixedMessage: tokenPrefixedMessage{
-					Token: Token{0xf4, 0x05, 0xdc, 0x14, 0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c, 0x49, 0x33, 0x52, 0x76},
+				TokenPrefixedMessage: messages.TokenPrefixedMessage{
+					Token: messages.Token{0xf4, 0x05, 0xdc, 0x14, 0x02, 0x23, 0x47, 0xf5, 0x8b, 0x79, 0x2c, 0x8c, 0x49, 0x33, 0x52, 0x76},
 				},
 			},
 			Bytes: []byte{
@@ -74,8 +75,8 @@ func Test_MessageConnection_Read(t *testing.T) {
 		},
 		{
 			Message: &serviceAnnouncementMessage{
-				tokenPrefixedMessage: tokenPrefixedMessage{
-					Token: Token{0x52, 0x3e, 0x67, 0x9d, 0xa4, 0x18, 0x4d, 0x1e, 0x83, 0xd0, 0xc7, 0x52, 0xcf, 0xca, 0x8f, 0xf7},
+				TokenPrefixedMessage: messages.TokenPrefixedMessage{
+					Token: messages.Token{0x52, 0x3e, 0x67, 0x9d, 0xa4, 0x18, 0x4d, 0x1e, 0x83, 0xd0, 0xc7, 0x52, 0xcf, 0xca, 0x8f, 0xf7},
 				},
 				Service: "DirectoryService",
 				Port:    0xe190,
@@ -100,8 +101,8 @@ func Test_MessageConnection_Read(t *testing.T) {
 		},
 		{
 			Message: &servicesRequestMessage{
-				tokenPrefixedMessage: tokenPrefixedMessage{
-					Token: Token{0x52, 0x3e, 0x67, 0x9d, 0xa4, 0x18, 0x4d, 0x1e, 0x83, 0xd0, 0xc7, 0x52, 0xcf, 0xca, 0x8f, 0xf7},
+				TokenPrefixedMessage: messages.TokenPrefixedMessage{
+					Token: messages.Token{0x52, 0x3e, 0x67, 0x9d, 0xa4, 0x18, 0x4d, 0x1e, 0x83, 0xd0, 0xc7, 0x52, 0xcf, 0xca, 0x8f, 0xf7},
 				},
 			},
 			Bytes: []byte{
@@ -117,7 +118,7 @@ func Test_MessageConnection_Read(t *testing.T) {
 		},
 		{
 			Message: &referenceMessage{
-				Token2:    Token{0x52, 0x3e, 0x67, 0x9d, 0xa4, 0x18, 0x4d, 0x1e, 0x83, 0xd0, 0xc7, 0x52, 0xcf, 0xca, 0x8f, 0xf7},
+				Token2:    messages.Token{0x52, 0x3e, 0x67, 0x9d, 0xa4, 0x18, 0x4d, 0x1e, 0x83, 0xd0, 0xc7, 0x52, 0xcf, 0xca, 0x8f, 0xf7},
 				Reference: 0x000009ed4f310604,
 			},
 			Bytes: []byte{
@@ -162,7 +163,7 @@ func Test_MessageConnection_Read(t *testing.T) {
 		t.Fatalf("Failed to accept test connection: %s", err.Error())
 	}
 
-	messageObjects := []message{}
+	messageObjects := []messages.Message{}
 	for _, testMessage := range testMessages {
 		messageObjects = append(messageObjects, testMessage.Message)
 	}
@@ -176,11 +177,13 @@ func Test_MessageConnection_Read(t *testing.T) {
 }
 
 func Test_MessageConnection(t *testing.T) {
-	testMessages := []message{
+	testMessages := []messages.Message{
 		&serviceAnnouncementMessage{
-			tokenPrefixedMessage: tokenPrefixedMessage{testToken},
-			Service:              "test",
-			Port:                 0x1234,
+			TokenPrefixedMessage: messages.TokenPrefixedMessage{
+				Token: testToken,
+			},
+			Service: "test",
+			Port:    0x1234,
 		},
 	}
 

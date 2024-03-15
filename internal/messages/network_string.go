@@ -1,4 +1,4 @@
-package stagelinq
+package messages
 
 import (
 	"encoding/binary"
@@ -9,11 +9,11 @@ import (
 )
 
 var (
-	utf16StringEncoding = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM)
-	utf8StringEncoding  = unicode.UTF8
+	UTF16 = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM)
+	UTF8  = unicode.UTF8
 )
 
-func writeLengthPrefixedNetworkString(w io.Writer, v string, enc encoding.Encoding) (err error) {
+func WriteNetworkStringWithEncoding(w io.Writer, v string, enc encoding.Encoding) (err error) {
 	converted, err := enc.NewEncoder().Bytes([]byte(v))
 	if err != nil {
 		return
@@ -25,7 +25,7 @@ func writeLengthPrefixedNetworkString(w io.Writer, v string, enc encoding.Encodi
 	return
 }
 
-func readLengthPrefixedNetworkString(r io.Reader, v *string, enc encoding.Encoding) (err error) {
+func ReadNetworkStringWithEncoding(r io.Reader, v *string, enc encoding.Encoding) (err error) {
 	var expectedLength uint32
 	if err = binary.Read(r, binary.BigEndian, &expectedLength); err != nil {
 		return
@@ -50,10 +50,10 @@ func readLengthPrefixedNetworkString(r io.Reader, v *string, enc encoding.Encodi
 	return
 }
 
-func writeNetworkString(w io.Writer, v string) (err error) {
-	return writeLengthPrefixedNetworkString(w, v, utf16StringEncoding)
+func WriteUTF16NetworkString(w io.Writer, v string) (err error) {
+	return WriteNetworkStringWithEncoding(w, v, UTF16)
 }
 
-func readNetworkString(r io.Reader, v *string) (err error) {
-	return readLengthPrefixedNetworkString(r, v, utf16StringEncoding)
+func ReadUTF16NetworkString(r io.Reader, v *string) (err error) {
+	return ReadNetworkStringWithEncoding(r, v, UTF16)
 }

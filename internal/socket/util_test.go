@@ -1,4 +1,4 @@
-package stagelinq
+package socket
 
 import (
 	"net"
@@ -8,11 +8,11 @@ import (
 )
 
 func Test_getPort(t *testing.T) {
-	require.Equal(t, 12345, getPort(&net.TCPAddr{
+	require.Equal(t, 12345, GetPortFromAddress(&net.TCPAddr{
 		IP:   net.IPv4(1, 2, 3, 4),
 		Port: 12345,
 	}))
-	require.Equal(t, 12345, getPort(&net.UDPAddr{
+	require.Equal(t, 12345, GetPortFromAddress(&net.UDPAddr{
 		IP:   net.IPv4(1, 2, 3, 4),
 		Port: 12345,
 	}))
@@ -47,7 +47,7 @@ func Test_makeBroadcastIP(t *testing.T) {
 	}
 
 	for _, testValue := range testValues {
-		require.Equal(t, testValue.ExpectedValue, makeBroadcastIP(
+		require.Equal(t, testValue.ExpectedValue, MakeBroadcastIP(
 			testValue.IP,
 			testValue.Mask,
 		))

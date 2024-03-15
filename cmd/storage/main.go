@@ -19,7 +19,6 @@ import (
 
 	"github.com/icedream/go-stagelinq/eaas/proto/enginelibrary"
 	"github.com/icedream/go-stagelinq/eaas/proto/networktrust"
-	"golang.org/x/text/encoding/unicode"
 	"google.golang.org/grpc"
 )
 
@@ -28,25 +27,6 @@ const (
 	appVersion = "0.0.0"
 	timeout    = 5 * time.Second
 )
-
-var (
-	eaasMagic         = []byte{'E', 'A', 'A', 'S', 0x01, 0x00}
-	eaasResponseMagic = []byte{'E', 'A', 'A', 'S', 0x01, 0x01}
-)
-
-var networkStringEncoding = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM)
-
-func writeNetworkString(w io.Writer, v string) (err error) {
-	converted, err := networkStringEncoding.NewEncoder().Bytes([]byte(v))
-	if err != nil {
-		return
-	}
-	if err = binary.Write(w, binary.BigEndian, uint32(len(converted))); err != nil {
-		return
-	}
-	_, err = w.Write(converted)
-	return
-}
 
 func main() {
 	var token [16]byte
@@ -153,10 +133,10 @@ func main() {
 				msg := new(bytes.Buffer)
 				msg.Write(eaasResponseMagic)
 				msg.Write(token[:])
-				writeNetworkString(msg, hostname)
+				messages.WriteNetworkString(msg, hostname)
 				uri := fmt.Sprintf("grpc://%s:%d", "192.168.188.120", 50010)
 				binary.Write(msg, binary.BigEndian, uint32(len(uri)))
-				writeNetworkString(msg, appVersion)
+				messages.WriteNetworkString(msg, appVersion)
 				msg.Write([]byte{0, 0, 0, 2, 0, 0x5f}) // TODO
 				b := msg.Bytes()
 				log.Println("Sending UDP beacon\n", hex.Dump(b))
