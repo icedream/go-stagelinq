@@ -9,6 +9,9 @@ require (
 
 require (
 	github.com/bufbuild/buf v1.30.0
+	github.com/dhowden/tag v0.0.0-20240122214204-713ab0e94639
+	github.com/google/uuid v1.6.0
+	github.com/lithammer/fuzzysearch v1.1.8
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
 )
