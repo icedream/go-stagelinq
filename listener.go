@@ -31,8 +31,10 @@ var ErrInvalidMessageReceived = errors.New("invalid message received")
 // message.
 var ErrInvalidDiscovererActionReceived = errors.New("invalid discoverer action received")
 
-const stagelinqDiscoveryNetwork = "udp"
-const stagelinqDiscoveryAddressString = ":51337"
+const (
+	stagelinqDiscoveryNetwork       = "udp"
+	stagelinqDiscoveryAddressString = ":51337"
+)
 
 var magicBytes = []byte("airD")
 
