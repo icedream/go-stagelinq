@@ -144,7 +144,7 @@ func (l *Listener) AnnounceEvery(interval time.Duration) {
 		for {
 			select {
 			case <-ticker.C: // next interval - announcement
-				if err := l.Announce(); checkErrIsNetClosed(err) {
+				if err := l.Announce(); errors.Is(err, net.ErrClosed) {
 					return
 				}
 				// NOTE - Considering AnnounceEvery is a fire-and-forget command we're ignoring other errors here for now. Not sure how to properly handle them otherwise atm.
