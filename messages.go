@@ -287,6 +287,85 @@ func (m *stateSubscribeMessage) writeTo(w io.Writer) (err error) {
 	return
 }
 
+type stateEmitResponseMessage struct {
+	// Length uint32
+	// Unknown []byte = {0x73,0x6d,0x61,0x61}
+	// Unknown2 []byte = {0x00,0x00,0x07,0xd1}
+	Name     string
+	Interval uint32
+}
+
+func (m *stateEmitResponseMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
+	return checkSmaa(r, 0x000007d1)
+}
+
+func (m *stateEmitResponseMessage) readFrom(r io.Reader) (err error) {
+	var expectedLength uint32
+	if err = binary.Read(r, binary.BigEndian, &expectedLength); err != nil {
+		return
+	}
+
+	// read smaa magic bytes
+	magicBytes := make([]byte, 4)
+	if _, err = r.Read(magicBytes); err != nil {
+		return
+	}
+	if !bytes.Equal(magicBytes, smaaMagicBytes) {
+		err = errors.New("invalid smaa magic bytes")
+		return
+	}
+
+	// TODO - figure this out
+	if _, err = r.Read(magicBytes); err != nil {
+		return
+	}
+	if !bytes.Equal(magicBytes, []byte{0x00, 0x00, 0x07, 0xd1}) {
+		err = errors.New("invalid post-smaa magic bytes")
+		return
+	}
+
+	// read value name
+	if err = readNetworkString(r, &m.Name); err != nil {
+		return
+	}
+
+	// TODO - figure this out
+	err = binary.Read(r, binary.BigEndian, &m.Interval)
+	return
+}
+
+func (m *stateEmitResponseMessage) writeTo(w io.Writer) (err error) {
+	// write smaa magic bytes
+	buf := new(bytes.Buffer)
+	if _, err = buf.Write(smaaMagicBytes); err != nil {
+		return
+	}
+
+	// TODO - figure this out
+	if _, err = buf.Write([]byte{0x00, 0x00, 0x07, 0xd1}); err != nil {
+		return
+	}
+
+	// write value name
+	if err = writeNetworkString(buf, m.Name); err != nil {
+		return
+	}
+
+	// TODO - figure this out
+	if err = binary.Write(buf, binary.BigEndian, m.Interval); err != nil {
+		return
+	}
+
+	// send message length over wire
+	if err = binary.Write(w, binary.BigEndian, uint32(buf.Len())); err != nil {
+		return
+	}
+
+	// send actual message over wire
+	_, err = w.Write(buf.Bytes())
+	return
+}
+
 type stateEmitMessage struct {
 	//Length uint32
 	//Unknown []byte = {0x73,0x6d,0x61,0x61}

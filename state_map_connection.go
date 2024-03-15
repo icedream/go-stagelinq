@@ -21,6 +21,7 @@ type StateMapConnection struct {
 
 var stateMapConnectionMessageSet = newDeviceConnMessageSet([]message{
 	&stateEmitMessage{},
+	&stateEmitResponseMessage{},
 })
 
 // NewStateMapConnection wraps an existing network connection and returns a StateMapConnection, providing the functionality to subscribe to and receive changes of state values.
@@ -87,6 +88,17 @@ func (smc *StateMapConnection) Subscribe(event string) error {
 	// TODO - check what to do with the int field in the state subscribe message, what is that?
 	return smc.conn.WriteMessage(&stateSubscribeMessage{
 		Name: event,
+	})
+}
+
+func (smc *StateMapConnection) Emit(state *State) error {
+	jsonBytes, err := json.Marshal(state.Value)
+	if err != nil {
+		return err
+	}
+	return smc.conn.WriteMessage(&stateEmitMessage{
+		Name: state.Name,
+		JSON: string(jsonBytes),
 	})
 }
 
