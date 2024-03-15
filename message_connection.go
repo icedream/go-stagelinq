@@ -3,6 +3,8 @@ package stagelinq
 import (
 	"bufio"
 	"bytes"
+	"encoding/hex"
+	"fmt"
 	"net"
 	"reflect"
 )
@@ -80,7 +82,8 @@ func (s *messageConnection) ReadMessage() (msg message, err error) {
 	}
 
 	if !ok {
-		err = ErrInvalidMessageReceived
+		b, _ := s.bufferedReader.Peek(s.bufferedReader.Buffered())
+		err = fmt.Errorf("%w: buffered bytes:\n%s", ErrInvalidMessageReceived, hex.Dump(b))
 		return
 	}
 
