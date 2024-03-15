@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package networktrust.v1;
+
+option go_package = "github.com/icedream/go-stagelinq/eaas/proto/networktrust";
+
+enum CreateTrustBusyReason {
+  CREATE_TRUST_BUSY_REASON_UNSPECIFIED = 0;
+  CREATE_TRUST_BUSY_REASON_TOO_MANY_ATTEMPTS = 1;
+  CREATE_TRUST_BUSY_REASON_HANDLING_ANOTHER_REQUEST = 2;
+}
+
+message CreateTrustRequest {
+  optional string ed25519_pk = 1;
+  optional uint32 wireguard_port = 2;
+  optional string device_name = 3;
+}
+
+message CreateTrustResponse {
+  oneof response {
+    CreateTrustGranted granted = 1;
+    CreateTrustDenied denied = 2;
+    CreateTrustBusy busy = 3;
+  }
+}
+
+message CreateTrustBusy { optional CreateTrustBusyReason reason = 1; }
+
+message CreateTrustDenied {}
+
+message CreateTrustGranted {}
+
+service NetworkTrustService {
+  rpc CreateTrust(CreateTrustRequest) returns (CreateTrustResponse);
+}

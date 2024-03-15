@@ -1,0 +1,13 @@
+version: v1
+plugins:
+- plugin: buf.build/protocolbuffers/go:v1.31.0
+  out: .
+  opt: paths=source_relative
+- plugin: buf.build/grpc/go
+  out: .
+  opt: paths=source_relative
+# - name: grpc-gateway
+#   out: .
+#   opt:
+#     - paths=source_relative
+#     - generate_unbound_methods=true
