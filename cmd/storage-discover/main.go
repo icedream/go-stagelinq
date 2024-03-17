@@ -2,16 +2,14 @@ package main
 
 import (
 	"context"
-	"crypto/ed25519"
-	"crypto/rand"
-	"crypto/x509"
+	"encoding/json"
+	"errors"
 	"flag"
 	"io"
 	"log"
 	"os"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/icedream/go-stagelinq/eaas"
 	"github.com/icedream/go-stagelinq/eaas/proto/enginelibrary"
 	"github.com/icedream/go-stagelinq/eaas/proto/networktrust"
@@ -27,8 +25,7 @@ const (
 var (
 	grpcURL  string
 	hostname string
-	key      ed25519.PrivateKey
-	id       uuid.UUID
+	identity string
 )
 
 func init() {
@@ -39,58 +36,6 @@ func init() {
 	hostname, err = os.Hostname()
 	if err != nil {
 		hostname = "eaas-demo"
-	}
-
-	if f, err := os.Open("eaas-key.bin"); err == nil {
-		defer f.Close()
-		keyBytes, err := io.ReadAll(f)
-		if err != nil {
-			panic(err)
-		}
-		readKey, err := x509.ParsePKCS8PrivateKey(keyBytes)
-		if err != nil {
-			panic(err)
-		}
-		if edkey, ok := readKey.(ed25519.PrivateKey); !ok {
-			panic("eaas-key.bin is not an ed25519 private key")
-		} else {
-			key = edkey
-		}
-	}
-	if key == nil {
-		_, priv, err := ed25519.GenerateKey(rand.Reader)
-		if err != nil {
-			panic(err)
-		}
-		keyBytes, err := x509.MarshalPKCS8PrivateKey(priv)
-		if err != nil {
-			panic(err)
-		}
-		os.WriteFile("eaas-key.bin", keyBytes, 0o600)
-		key = priv
-	}
-
-	if f, err := os.Open("eaas-id.txt"); err == nil {
-		defer f.Close()
-		keyBytes, err := io.ReadAll(f)
-		if err != nil {
-			panic(err)
-		}
-		id, err = uuid.ParseBytes(keyBytes)
-		if err != nil {
-			panic(err)
-		}
-	}
-	if key == nil {
-		id, err = uuid.NewUUID()
-		if err != nil {
-			panic(err)
-		}
-		keyBytes, err := id.MarshalBinary()
-		if err != nil {
-			panic(err)
-		}
-		os.WriteFile("eaas-id.txt", keyBytes, 0o600)
 	}
 }
 
@@ -107,22 +52,33 @@ func main() {
 	runEngineLibraryUI(grpcURL)
 }
 
+func marshalJSON(v any) []byte {
+	s, _ := json.Marshal(v)
+	return s
+}
+
 func runEngineLibraryUI(grpcURL string) {
+	// load our identity so we don't have to repeatedly re-verify
+	identity, err := loadUUIDKey()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	ctx := context.Background()
 	connection, err := eaas.DialContext(ctx, grpcURL)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	// pk := string(key.Public().(ed25519.PublicKey))
-	pk := id.String()
 	log.Println("Waiting for approval on the other end...")
 	resp, err := connection.CreateTrust(ctx, &networktrust.CreateTrustRequest{
 		DeviceName: &hostname,
-		Ed25519Pk:  &pk,
+		// I honestly don't know why in the proto it was defined as "Ed25519Pk"...
+		Ed25519Pk: &identity,
+		// ...or why there even is a WireguardPort field, too?!
 	})
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	switch {
 	case resp.GetGranted() != nil:
@@ -139,37 +95,56 @@ func runEngineLibraryUI(grpcURL string) {
 	if err != nil {
 		panic(err)
 	}
-	var pageSize uint32 = 100
+	var pageSize uint32 = 25
+	getTracksResp, err := connection.GetTracks(ctx, &enginelibrary.GetTracksRequest{
+		PageSize: &pageSize,
+	})
+	if err != nil {
+		panic(err)
+	}
+	for _, track := range getTracksResp.GetTracks() {
+		log.Printf("Track: %s", string(marshalJSON(track)))
+		getTrackResp, err := connection.GetTrack(ctx, &enginelibrary.GetTrackRequest{
+			TrackId: track.GetMetadata().Id,
+		})
+		if err != nil {
+			log.Println("\tfailed to GetTrack on this track")
+			continue
+		}
+		log.Printf("\t%+v", getTrackResp)
+	}
 	for _, playlist := range getLibraryResp.GetPlaylists() {
-		log.Printf("Playlist %q (%q)", playlist.GetTitle(), playlist.GetListType())
-
+		log.Printf("Playlist: %s", string(marshalJSON(playlist)))
 		getTracksResp, err := connection.GetTracks(ctx, &enginelibrary.GetTracksRequest{
 			PlaylistId: playlist.Id,
 			PageSize:   &pageSize,
 		})
+		if errors.Is(err, io.EOF) {
+			// BUG - empty playlist causes EOF, reconnect
+			connection, err = eaas.DialContext(ctx, grpcURL)
+			if err != nil {
+				panic(err)
+			}
+		}
 		if err != nil {
 			panic(err)
 		}
 		for _, track := range getTracksResp.GetTracks() {
-			metadata := track.GetMetadata()
-			if metadata == nil {
-				continue
-			}
-			log.Printf("\tTrack %s", metadata.String())
+			log.Printf("\tTrack: ID %s", track.GetMetadata().GetId())
 		}
 	}
 }
 
 func runDiscovery() {
-	listener, err := eaas.ListenWithConfiguration(&eaas.ListenerConfiguration{
+	discoverer, err := eaas.NewDiscovererWithConfiguration(&eaas.DiscovererConfiguration{
 		DiscoveryTimeout: timeout,
 	})
 	if err != nil {
 		panic(err)
 	}
-	defer listener.Close()
+	defer discoverer.Shutdown()
 
-	listener.SendBeaconEvery(5 * time.Second)
+	discoverer.ScanEvery(5 * time.Second)
 
 	deadline := time.After(timeout)
 	foundDevices := []*eaas.Device{}
@@ -182,7 +157,7 @@ discoveryLoop:
 		case <-deadline:
 			break discoveryLoop
 		default:
-			device, err := listener.Discover(timeout)
+			device, err := discoverer.Discover(timeout)
 			if err != nil {
 				log.Printf("WARNING: %s", err.Error())
 				continue discoveryLoop

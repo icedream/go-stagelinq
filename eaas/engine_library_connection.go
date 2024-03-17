@@ -9,6 +9,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+// EngineLibraryConnection provides API functionality for interacting with
+// remote Engine libraries.
 type EngineLibraryConnection struct {
 	grpc *grpc.ClientConn
 
@@ -16,6 +18,10 @@ type EngineLibraryConnection struct {
 	enginelibrary.EngineLibraryServiceClient
 }
 
+// Close shuts down the gRPC connection to the EAAS API.
+//
+// Invoke this method once you're done using the connection to free up
+// resources.
 func (c *EngineLibraryConnection) Close() error {
 	return c.grpc.Close()
 }
@@ -28,11 +34,24 @@ func newClient(cc *grpc.ClientConn) *EngineLibraryConnection {
 	}
 }
 
+// Dial connects to the given EAAS gRPC API endpoint.
+//
+// Currently, the url value must be compatible with targets supported by the
+// go-grpc library.
 func Dial(url string) (*EngineLibraryConnection, error) {
 	return DialContext(context.Background(), url)
 }
 
-func DialContext(ctx context.Context, url string) (*EngineLibraryConnection, error) {
+// DialContext connects to the given EAAS gRPC API endpoint and sets up the
+// backing gRPC client with the given context.
+//
+// Currently, the url value must be compatible with targets supported by the
+// go-grpc library.
+func DialContext(
+	ctx context.Context,
+	url string,
+) (*EngineLibraryConnection, error) {
+	// TODO - handle grpc://<IP>:<PORT> as that's the format Engine uses
 	clientConn, err := grpc.DialContext(ctx, url,
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {

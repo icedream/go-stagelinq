@@ -1,6 +1,6 @@
 package eaas
 
-// Device presents information about a discovered StagelinQ device on the network.
+// Device presents information about a discovered EAAS device on the network.
 type Device struct {
 	port  uint16
 	token Token
@@ -10,15 +10,12 @@ type Device struct {
 	SoftwareVersion string
 }
 
-// TODO - func (device *Device) Dial() (conn net.Conn, err error)
-// TODO - func (device *Device) Connect(token Token, offeredServices []*Service) (conn *MainConnection, err error) {
+// TODO - func (device *Device) Dial() - gRPC client
 
-// IsEqual checks if this device has the same address and values as the other given device.
+// IsEqual checks if this device has the same identifying token as the other
+// given device.
 func (device *Device) IsEqual(anotherDevice *Device) bool {
-	return device.token == anotherDevice.token &&
-		device.Hostname == anotherDevice.Hostname &&
-		device.URL == anotherDevice.URL &&
-		device.SoftwareVersion == anotherDevice.SoftwareVersion
+	return device.token == anotherDevice.token
 }
 
 func newDeviceFromDiscovery(msg *eaasDiscoveryResponseMessage) *Device {
