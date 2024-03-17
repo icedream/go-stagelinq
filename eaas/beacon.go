@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"runtime"
 	"sync"
 
 	"github.com/icedream/go-stagelinq/internal/messages"
@@ -80,23 +81,53 @@ func (l *Beacon) getGRPCURL(ip net.IP) string {
 	return fmt.Sprintf("grpc://%s:%d", host, l.grpcPort)
 }
 
-func (l *Beacon) replyIPv4(cm *ipv4.ControlMessage, srcAddr net.Addr) error {
-	if cm == nil {
-		panic("control message must not be nil")
+func (l *Beacon) replyIPv4(controlMessage *ipv4.ControlMessage, srcAddr net.Addr) error {
+	var ip net.IP
+	if controlMessage != nil && controlMessage.IfIndex > 0 {
+		// Short path - figure out the an IP that we could be reachable from
+		// based on the interface the broadcast came from
+		netInterface, err := net.InterfaceByIndex(controlMessage.IfIndex)
+		if err != nil {
+			return err
+		}
+		interfaceAddresses, err := netInterface.Addrs()
+		if err != nil {
+			return err
+		}
+		ip = socket.GetIPFromAddress(interfaceAddresses[0])
+	} else {
+		// Long path - figure out any IP-based path that works for the source to
+		// reach us
+		netInterfaces, err := net.Interfaces()
+		if err != nil {
+			return err
+		}
+		allInterfaceAddresses := []net.Addr{}
+		for _, netInterface := range netInterfaces {
+			interfaceAddresses, err := netInterface.Addrs()
+			if err != nil {
+				// TODO - Log this somehow? For now let's just move on...
+				continue
+			}
+			allInterfaceAddresses = append(allInterfaceAddresses, interfaceAddresses...)
+		}
+		// Pick the first interface IP that could talk straight to the source
+		srcIP := socket.GetIPFromAddress(srcAddr)
+		for _, interfaceAddr := range allInterfaceAddresses {
+			interfaceIP := socket.GetIPFromAddress(interfaceAddr)
+			interfaceMask := socket.GetMaskFromAddress(interfaceAddr)
+			intfnet := &net.IPNet{
+				IP:   interfaceIP,
+				Mask: interfaceMask,
+			}
+			if intfnet.Contains(srcIP) {
+				ip = interfaceIP
+				break
+			}
+		}
 	}
-	// figure out the an IP that we could be reachable from based on the
-	// interface the broadcast came from
-	intf, err := net.InterfaceByIndex(cm.IfIndex)
-	if err != nil {
-		return err
-	}
-	addrs, err := intf.Addrs()
-	if err != nil {
-		return err
-	}
-	ip := socket.GetIPFromAddress(addrs[0])
 	// TODO - optimization: cache the built message because it will be sent repeatedly?
-	m := &eaasDiscoveryResponseMessage{
+	responseMessage := &eaasDiscoveryResponseMessage{
 		TokenPrefixedMessage: messages.TokenPrefixedMessage{
 			Token: messages.Token(l.token),
 		},
@@ -106,13 +137,16 @@ func (l *Beacon) replyIPv4(cm *ipv4.ControlMessage, srcAddr net.Addr) error {
 		Extra:           "_",
 	}
 	b := new(bytes.Buffer)
-	if err := m.WriteMessageTo(b); err != nil {
+	if err := responseMessage.WriteMessageTo(b); err != nil {
 		return err
 	}
-	ncm := &ipv4.ControlMessage{
-		IfIndex: cm.IfIndex,
+	var replyControlMessage *ipv4.ControlMessage
+	if controlMessage != nil {
+		replyControlMessage = &ipv4.ControlMessage{
+			IfIndex: controlMessage.IfIndex,
+		}
 	}
-	if _, err := l.packetConn4.WriteTo(b.Bytes(), ncm, srcAddr); err != nil {
+	if _, err := l.packetConn4.WriteTo(b.Bytes(), replyControlMessage, srcAddr); err != nil {
 		return err
 	}
 	return nil
@@ -179,13 +213,19 @@ func StartBeaconWithConfiguration(beaconConfig *BeaconConfiguration) (beacon *Be
 	//
 	// This is however necessary so we return the correct IP for Engine software
 	// to connect to.
-	if err := ipv4PacketConn.SetControlMessage(ipv4.FlagInterface, true); err != nil {
-		err = errors.Join(
-			fmt.Errorf(
-				"failed to set control messages to forward interface index: %w",
-				err),
-			packetConn.Close())
-		return nil, err
+	switch runtime.GOOS {
+	case "windows":
+		// No control message flags implemented, gotta sort out by source IP
+	default:
+		// Everything else can use the short path of just using interface IP
+		if err := ipv4PacketConn.SetControlMessage(ipv4.FlagInterface, true); err != nil {
+			err = errors.Join(
+				fmt.Errorf(
+					"failed to set control message flags: %w",
+					err),
+				packetConn.Close())
+			return nil, err
+		}
 	}
 
 	b := &Beacon{
