@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"net"
 	"strings"
+
+	"github.com/icedream/go-stagelinq/internal/messages"
+	"github.com/icedream/go-stagelinq/internal/socket"
 )
 
 // State represents a received state value.
@@ -19,7 +22,7 @@ type StateMapConnection struct {
 	stateC chan *State
 }
 
-var stateMapConnectionMessageSet = newDeviceConnMessageSet([]message{
+var stateMapConnectionMessageSet = newDeviceConnMessageSet([]messages.Message{
 	&stateEmitMessage{},
 	&stateEmitResponseMessage{},
 })
@@ -41,11 +44,11 @@ func NewStateMapConnection(conn net.Conn, token Token) (smc *StateMapConnection,
 	// Before we do anything else, we announce our TCP source port in-protocol.
 	// I have observed SoundSwitch and Resolume doing this, don't know what the purpose is though.
 	msgConn.WriteMessage(&serviceAnnouncementMessage{
-		tokenPrefixedMessage: tokenPrefixedMessage{
-			Token: token,
+		TokenPrefixedMessage: messages.TokenPrefixedMessage{
+			Token: messages.Token(token),
 		},
 		Service: "StateMap",
-		Port:    uint16(getPort(conn.LocalAddr())),
+		Port:    uint16(socket.GetPortFromAddress(conn.LocalAddr())),
 	})
 
 	go func() {
@@ -58,7 +61,7 @@ func NewStateMapConnection(conn net.Conn, token Token) (smc *StateMapConnection,
 			close(stateMapConn.stateC)
 		}()
 		for {
-			var msg message
+			var msg messages.Message
 			msg, err = msgConn.ReadMessage()
 			if err != nil {
 				return

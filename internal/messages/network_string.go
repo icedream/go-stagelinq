@@ -1,16 +1,20 @@
-package stagelinq
+package messages
 
 import (
 	"encoding/binary"
 	"io"
 
+	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/unicode"
 )
 
-var networkStringEncoding = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM)
+var (
+	UTF16 = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM)
+	UTF8  = unicode.UTF8
+)
 
-func writeNetworkString(w io.Writer, v string) (err error) {
-	converted, err := networkStringEncoding.NewEncoder().Bytes([]byte(v))
+func WriteNetworkStringWithEncoding(w io.Writer, v string, enc encoding.Encoding) (err error) {
+	converted, err := enc.NewEncoder().Bytes([]byte(v))
 	if err != nil {
 		return
 	}
@@ -21,7 +25,7 @@ func writeNetworkString(w io.Writer, v string) (err error) {
 	return
 }
 
-func readNetworkString(r io.Reader, v *string) (err error) {
+func ReadNetworkStringWithEncoding(r io.Reader, v *string, enc encoding.Encoding) (err error) {
 	var expectedLength uint32
 	if err = binary.Read(r, binary.BigEndian, &expectedLength); err != nil {
 		return
@@ -38,10 +42,18 @@ func readNetworkString(r io.Reader, v *string) (err error) {
 		}
 		offset += n
 	}
-	vBytes, err := networkStringEncoding.NewDecoder().Bytes(buf)
+	vBytes, err := enc.NewDecoder().Bytes(buf)
 	if err != nil {
 		return
 	}
 	*v = string(vBytes)
 	return
+}
+
+func WriteUTF16NetworkString(w io.Writer, v string) (err error) {
+	return WriteNetworkStringWithEncoding(w, v, UTF16)
+}
+
+func ReadUTF16NetworkString(r io.Reader, v *string) (err error) {
+	return ReadNetworkStringWithEncoding(r, v, UTF16)
 }

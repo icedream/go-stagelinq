@@ -8,6 +8,9 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"github.com/icedream/go-stagelinq/internal/messages"
+	"github.com/icedream/go-stagelinq/internal/socket"
 )
 
 // ErrTooShortDiscoveryMessageReceived is returned by Listener.Discover if a
@@ -43,44 +46,6 @@ func makeStagelinqDiscoveryBroadcastAddress(ip net.IP) *net.UDPAddr {
 		IP:   ip,
 		Port: 51337,
 	}
-}
-
-func getAllBroadcastIPs() (retval []net.IP, err error) {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return
-	}
-
-	ips := []net.IP{}
-addrsLoop:
-	for _, addr := range addrs {
-		var ip net.IP
-		var mask net.IPMask
-		switch v := addr.(type) {
-		case *net.IPAddr:
-			ip = v.IP
-			mask = v.IP.DefaultMask()
-		case *net.IPNet:
-			ip = v.IP
-			mask = v.Mask
-		}
-		if ip == nil {
-			continue
-		}
-
-		// prevent addresses from being added multiple times (for example zeroconf)
-		bip := makeBroadcastIP(ip, mask)
-		for _, alreadyAddedIP := range ips {
-			if alreadyAddedIP.Equal(bip) {
-				continue addrsLoop
-			}
-		}
-
-		ips = append(ips, bip)
-	}
-
-	retval = ips
-	return
 }
 
 // Listener listens on UDP port 51337 for StagelinQ devices and announces itself in the same way.
@@ -169,19 +134,19 @@ func (l *Listener) announce(action discovererMessageAction) (err error) {
 		Source:          l.name,
 		SoftwareName:    l.softwareName,
 		SoftwareVersion: l.softwareVersion,
-		tokenPrefixedMessage: tokenPrefixedMessage{
-			Token: l.token,
+		TokenPrefixedMessage: messages.TokenPrefixedMessage{
+			Token: messages.Token(l.token),
 		},
 		Action: action,
 		Port:   l.port,
 	}
 	b := new(bytes.Buffer)
-	err = m.writeTo(b)
+	err = m.WriteMessageTo(b)
 	if err != nil {
 		return
 	}
 	finalBytes := b.Bytes()
-	ips, err := getAllBroadcastIPs()
+	ips, err := socket.GetAllBroadcastIPs()
 	if err != nil {
 		return
 	}
@@ -230,7 +195,7 @@ readLoop:
 		// decode message
 		r := bytes.NewReader(b)
 		m := new(discoveryMessage)
-		if err = m.readFrom(r); err != nil {
+		if err = m.ReadMessageFrom(r); err != nil {
 			return
 		}
 
@@ -289,7 +254,7 @@ func ListenWithConfiguration(listenerConfig *ListenerConfiguration) (listener *L
 
 	// We are setting up a shared UDP address socket here to allow other applications to still listen for StagelinQ discovery messages
 	config := &net.ListenConfig{
-		Control: setSocketControlForReusePort,
+		Control: socket.SetSocketControlForReusePort,
 	}
 	packetConn, err := config.ListenPacket(ctx, stagelinqDiscoveryNetwork, stagelinqDiscoveryAddressString)
 	if err != nil {

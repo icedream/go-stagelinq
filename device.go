@@ -1,6 +1,8 @@
 package stagelinq
 
-import "net"
+import (
+	"net"
+)
 
 // DeviceState represents a device's state in the network.
 // Possible values are DevicePresent and DeviceLeaving.
@@ -59,7 +61,7 @@ func (device *Device) IsEqual(anotherDevice *Device) bool {
 func newDeviceFromDiscovery(addr *net.UDPAddr, msg *discoveryMessage) *Device {
 	return &Device{
 		port:  msg.Port,
-		token: msg.Token,
+		token: Token(msg.Token),
 
 		IP:              addr.IP,
 		Name:            msg.Source,

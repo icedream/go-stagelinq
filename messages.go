@@ -6,61 +6,20 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+
+	"github.com/icedream/go-stagelinq/internal/messages"
 )
 
-// Token contains the identifying Token for a device in the StagelinQ network.
-type Token [16]byte
-
-type message interface {
-	readFrom(io.Reader) error
-	writeTo(io.Writer) error
-
-	// checkMatch MUST use the Peek method to read any bytes needed to exactly identify whether a message matches.
-	// It SHOULD not peek more bytes than are necessary to identify the message.
-	// The method MUST avoid Read to allow other message types to validate the message properly.
-	checkMatch(*bufio.Reader) (bool, error)
-}
-
-func readMessageID(r io.Reader) (id int32, err error) {
-	err = binary.Read(r, binary.BigEndian, &id)
-	return
-}
-
-func peekMessageID(r *bufio.Reader) (id int32, err error) {
-	b, err := r.Peek(4)
-	if err != nil {
-		return
-	}
-	return readMessageID(bytes.NewReader(b))
-}
-
-func writeMessageID(w io.Writer, id int32) (err error) {
-	err = binary.Write(w, binary.BigEndian, id)
-	return
-}
-
-type tokenPrefixedMessage struct {
-	Token Token
-}
-
-func (m *tokenPrefixedMessage) readFrom(r io.Reader) (err error) {
-	_, err = r.Read(m.Token[:])
-	return
-}
-
-func (m *tokenPrefixedMessage) writeTo(w io.Writer) (err error) {
-	_, err = w.Write(m.Token[:])
-	return
-}
+type Token messages.Token
 
 type serviceAnnouncementMessage struct {
-	tokenPrefixedMessage
+	messages.TokenPrefixedMessage
 	Service string
 	Port    uint16
 }
 
-func (m *serviceAnnouncementMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
-	id, err := peekMessageID(r)
+func (m *serviceAnnouncementMessage) CheckMatch(r *bufio.Reader) (ok bool, err error) {
+	id, err := messages.PeekMessageID(r)
 	if err != nil {
 		return
 	}
@@ -68,18 +27,18 @@ func (m *serviceAnnouncementMessage) checkMatch(r *bufio.Reader) (ok bool, err e
 	return
 }
 
-func (m *serviceAnnouncementMessage) readFrom(r io.Reader) (err error) {
-	messageID, err := readMessageID(r)
+func (m *serviceAnnouncementMessage) ReadMessageFrom(r io.Reader) (err error) {
+	messageID, err := messages.ReadMessageID(r)
 	if err != nil {
 		return
 	} else if messageID != 0x00000000 {
 		err = ErrInvalidMessageReceived
 		return
 	}
-	if err = m.tokenPrefixedMessage.readFrom(r); err != nil {
+	if err = m.TokenPrefixedMessage.ReadMessageFrom(r); err != nil {
 		return
 	}
-	if err = readNetworkString(r, &m.Service); err != nil {
+	if err = messages.ReadUTF16NetworkString(r, &m.Service); err != nil {
 		return
 	}
 	if err = binary.Read(r, binary.BigEndian, &m.Port); err != nil {
@@ -88,14 +47,14 @@ func (m *serviceAnnouncementMessage) readFrom(r io.Reader) (err error) {
 	return
 }
 
-func (m *serviceAnnouncementMessage) writeTo(w io.Writer) (err error) {
-	if err = writeMessageID(w, 0x00000000); err != nil {
+func (m *serviceAnnouncementMessage) WriteMessageTo(w io.Writer) (err error) {
+	if err = messages.WriteMessageID(w, 0x00000000); err != nil {
 		return
 	}
-	if err = m.tokenPrefixedMessage.writeTo(w); err != nil {
+	if err = m.TokenPrefixedMessage.WriteMessageTo(w); err != nil {
 		return
 	}
-	if err = writeNetworkString(w, m.Service); err != nil {
+	if err = messages.WriteUTF16NetworkString(w, m.Service); err != nil {
 		return
 	}
 	err = binary.Write(w, binary.BigEndian, m.Port)
@@ -103,13 +62,13 @@ func (m *serviceAnnouncementMessage) writeTo(w io.Writer) (err error) {
 }
 
 type referenceMessage struct {
-	tokenPrefixedMessage
-	Token2    Token
+	messages.TokenPrefixedMessage
+	Token2    messages.Token
 	Reference int64
 }
 
-func (m *referenceMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
-	id, err := peekMessageID(r)
+func (m *referenceMessage) CheckMatch(r *bufio.Reader) (ok bool, err error) {
+	id, err := messages.PeekMessageID(r)
 	if err != nil {
 		return
 	}
@@ -117,15 +76,15 @@ func (m *referenceMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
 	return
 }
 
-func (m *referenceMessage) readFrom(r io.Reader) (err error) {
-	messageID, err := readMessageID(r)
+func (m *referenceMessage) ReadMessageFrom(r io.Reader) (err error) {
+	messageID, err := messages.ReadMessageID(r)
 	if err != nil {
 		return
 	} else if messageID != 0x00000001 {
 		err = ErrInvalidMessageReceived
 		return
 	}
-	if err = m.tokenPrefixedMessage.readFrom(r); err != nil {
+	if err = m.TokenPrefixedMessage.ReadMessageFrom(r); err != nil {
 		return
 	}
 	if _, err = r.Read(m.Token2[:]); err != nil {
@@ -135,11 +94,11 @@ func (m *referenceMessage) readFrom(r io.Reader) (err error) {
 	return
 }
 
-func (m *referenceMessage) writeTo(w io.Writer) (err error) {
-	if err = writeMessageID(w, 0x00000001); err != nil {
+func (m *referenceMessage) WriteMessageTo(w io.Writer) (err error) {
+	if err = messages.WriteMessageID(w, 0x00000001); err != nil {
 		return
 	}
-	if err = m.tokenPrefixedMessage.writeTo(w); err != nil {
+	if err = m.TokenPrefixedMessage.WriteMessageTo(w); err != nil {
 		return
 	}
 	if _, err = w.Write(m.Token2[:]); err != nil {
@@ -150,11 +109,11 @@ func (m *referenceMessage) writeTo(w io.Writer) (err error) {
 }
 
 type servicesRequestMessage struct {
-	tokenPrefixedMessage
+	messages.TokenPrefixedMessage
 }
 
-func (m *servicesRequestMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
-	id, err := peekMessageID(r)
+func (m *servicesRequestMessage) CheckMatch(r *bufio.Reader) (ok bool, err error) {
+	id, err := messages.PeekMessageID(r)
 	if err != nil {
 		return
 	}
@@ -162,8 +121,8 @@ func (m *servicesRequestMessage) checkMatch(r *bufio.Reader) (ok bool, err error
 	return
 }
 
-func (m *servicesRequestMessage) readFrom(r io.Reader) (err error) {
-	messageID, err := readMessageID(r)
+func (m *servicesRequestMessage) ReadMessageFrom(r io.Reader) (err error) {
+	messageID, err := messages.ReadMessageID(r)
 	if err != nil {
 		return
 	} else if messageID != 0x00000002 {
@@ -171,16 +130,16 @@ func (m *servicesRequestMessage) readFrom(r io.Reader) (err error) {
 		return
 	}
 
-	err = m.tokenPrefixedMessage.readFrom(r)
+	err = m.TokenPrefixedMessage.ReadMessageFrom(r)
 	return
 }
 
-func (m *servicesRequestMessage) writeTo(w io.Writer) (err error) {
-	if err = writeMessageID(w, 0x00000002); err != nil {
+func (m *servicesRequestMessage) WriteMessageTo(w io.Writer) (err error) {
+	if err = messages.WriteMessageID(w, 0x00000002); err != nil {
 		return
 	}
 
-	err = m.tokenPrefixedMessage.writeTo(w)
+	err = m.TokenPrefixedMessage.WriteMessageTo(w)
 	return
 }
 
@@ -209,18 +168,18 @@ func checkSmaa(r *bufio.Reader, id int32) (ok bool, err error) {
 }
 
 type stateSubscribeMessage struct {
-	//Length uint32
-	//Unknown []byte = {0x73,0x6d,0x61,0x61}
-	//Unknown2 []byte = {0x00,0x00,0x07,0xd2}
+	// Length uint32
+	// Unknown []byte = {0x73,0x6d,0x61,0x61}
+	// Unknown2 []byte = {0x00,0x00,0x07,0xd2}
 	Name     string
 	Interval uint32
 }
 
-func (m *stateSubscribeMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
+func (m *stateSubscribeMessage) CheckMatch(r *bufio.Reader) (ok bool, err error) {
 	return checkSmaa(r, 0x000007d2)
 }
 
-func (m *stateSubscribeMessage) readFrom(r io.Reader) (err error) {
+func (m *stateSubscribeMessage) ReadMessageFrom(r io.Reader) (err error) {
 	var expectedLength uint32
 	if err = binary.Read(r, binary.BigEndian, &expectedLength); err != nil {
 		return
@@ -246,7 +205,7 @@ func (m *stateSubscribeMessage) readFrom(r io.Reader) (err error) {
 	}
 
 	// read value name
-	if err = readNetworkString(r, &m.Name); err != nil {
+	if err = messages.ReadUTF16NetworkString(r, &m.Name); err != nil {
 		return
 	}
 
@@ -255,7 +214,7 @@ func (m *stateSubscribeMessage) readFrom(r io.Reader) (err error) {
 	return
 }
 
-func (m *stateSubscribeMessage) writeTo(w io.Writer) (err error) {
+func (m *stateSubscribeMessage) WriteMessageTo(w io.Writer) (err error) {
 	// write smaa magic bytes
 	buf := new(bytes.Buffer)
 	if _, err = buf.Write(smaaMagicBytes); err != nil {
@@ -268,7 +227,7 @@ func (m *stateSubscribeMessage) writeTo(w io.Writer) (err error) {
 	}
 
 	// write value name
-	if err = writeNetworkString(buf, m.Name); err != nil {
+	if err = messages.WriteUTF16NetworkString(buf, m.Name); err != nil {
 		return
 	}
 
@@ -295,11 +254,11 @@ type stateEmitResponseMessage struct {
 	Interval uint32
 }
 
-func (m *stateEmitResponseMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
+func (m *stateEmitResponseMessage) CheckMatch(r *bufio.Reader) (ok bool, err error) {
 	return checkSmaa(r, 0x000007d1)
 }
 
-func (m *stateEmitResponseMessage) readFrom(r io.Reader) (err error) {
+func (m *stateEmitResponseMessage) ReadMessageFrom(r io.Reader) (err error) {
 	var expectedLength uint32
 	if err = binary.Read(r, binary.BigEndian, &expectedLength); err != nil {
 		return
@@ -325,7 +284,7 @@ func (m *stateEmitResponseMessage) readFrom(r io.Reader) (err error) {
 	}
 
 	// read value name
-	if err = readNetworkString(r, &m.Name); err != nil {
+	if err = messages.ReadUTF16NetworkString(r, &m.Name); err != nil {
 		return
 	}
 
@@ -334,7 +293,7 @@ func (m *stateEmitResponseMessage) readFrom(r io.Reader) (err error) {
 	return
 }
 
-func (m *stateEmitResponseMessage) writeTo(w io.Writer) (err error) {
+func (m *stateEmitResponseMessage) WriteMessageTo(w io.Writer) (err error) {
 	// write smaa magic bytes
 	buf := new(bytes.Buffer)
 	if _, err = buf.Write(smaaMagicBytes); err != nil {
@@ -347,7 +306,7 @@ func (m *stateEmitResponseMessage) writeTo(w io.Writer) (err error) {
 	}
 
 	// write value name
-	if err = writeNetworkString(buf, m.Name); err != nil {
+	if err = messages.WriteUTF16NetworkString(buf, m.Name); err != nil {
 		return
 	}
 
@@ -367,18 +326,18 @@ func (m *stateEmitResponseMessage) writeTo(w io.Writer) (err error) {
 }
 
 type stateEmitMessage struct {
-	//Length uint32
-	//Unknown []byte = {0x73,0x6d,0x61,0x61}
-	//Unknown2 []byte = {0x00,0x00,0x00,0x00}
+	// Length uint32
+	// Unknown []byte = {0x73,0x6d,0x61,0x61}
+	// Unknown2 []byte = {0x00,0x00,0x00,0x00}
 	Name string
 	JSON string
 }
 
-func (m *stateEmitMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
+func (m *stateEmitMessage) CheckMatch(r *bufio.Reader) (ok bool, err error) {
 	return checkSmaa(r, 0x00000000)
 }
 
-func (m *stateEmitMessage) readFrom(r io.Reader) (err error) {
+func (m *stateEmitMessage) ReadMessageFrom(r io.Reader) (err error) {
 	// read expected message length
 	var expectedLength uint32
 	if err = binary.Read(r, binary.BigEndian, &expectedLength); err != nil {
@@ -417,19 +376,19 @@ func (m *stateEmitMessage) readFrom(r io.Reader) (err error) {
 	}
 
 	// read value name
-	if err = readNetworkString(msgReader, &m.Name); err != nil {
+	if err = messages.ReadUTF16NetworkString(msgReader, &m.Name); err != nil {
 		return
 	}
 
 	// read value JSON
-	if err = readNetworkString(msgReader, &m.JSON); err != nil {
+	if err = messages.ReadUTF16NetworkString(msgReader, &m.JSON); err != nil {
 		return
 	}
 
 	return
 }
 
-func (m *stateEmitMessage) writeTo(w io.Writer) (err error) {
+func (m *stateEmitMessage) WriteMessageTo(w io.Writer) (err error) {
 	buf := new(bytes.Buffer)
 
 	// write smaa magic bytes to message buffer
@@ -443,12 +402,12 @@ func (m *stateEmitMessage) writeTo(w io.Writer) (err error) {
 	}
 
 	// write value name to message buffer
-	if err = writeNetworkString(buf, m.Name); err != nil {
+	if err = messages.WriteUTF16NetworkString(buf, m.Name); err != nil {
 		return
 	}
 
 	// write value JSON to message buffer
-	if err = writeNetworkString(buf, m.JSON); err != nil {
+	if err = messages.WriteUTF16NetworkString(buf, m.JSON); err != nil {
 		return
 	}
 
@@ -466,10 +425,9 @@ func (m *stateEmitMessage) writeTo(w io.Writer) (err error) {
 
 var beatInfoStartStreamMagicBytes = []byte{0x0, 0x0, 0x0, 0x0}
 
-type beatInfoStartStreamMessage struct {
-}
+type beatInfoStartStreamMessage struct{}
 
-func (m *beatInfoStartStreamMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
+func (m *beatInfoStartStreamMessage) CheckMatch(r *bufio.Reader) (ok bool, err error) {
 	// peek length bytes and magic bytes
 	b, err := r.Peek(4 + 4)
 	if err != nil {
@@ -482,7 +440,7 @@ func (m *beatInfoStartStreamMessage) checkMatch(r *bufio.Reader) (ok bool, err e
 	return
 }
 
-func (m *beatInfoStartStreamMessage) readFrom(r io.Reader) (err error) {
+func (m *beatInfoStartStreamMessage) ReadMessageFrom(r io.Reader) (err error) {
 	// read expected message length
 	var expectedLength uint32
 	if err = binary.Read(r, binary.BigEndian, &expectedLength); err != nil {
@@ -513,7 +471,7 @@ func (m *beatInfoStartStreamMessage) readFrom(r io.Reader) (err error) {
 	return
 }
 
-func (m *beatInfoStartStreamMessage) writeTo(w io.Writer) (err error) {
+func (m *beatInfoStartStreamMessage) WriteMessageTo(w io.Writer) (err error) {
 	buf := new(bytes.Buffer)
 
 	payload_len := len(beatInfoStartStreamMagicBytes)
@@ -533,10 +491,9 @@ func (m *beatInfoStartStreamMessage) writeTo(w io.Writer) (err error) {
 
 var beatInfoStopStreamMagicBytes = []byte{0x0, 0x0, 0x0, 0x1}
 
-type beatInfoStopStreamMessage struct {
-}
+type beatInfoStopStreamMessage struct{}
 
-func (m *beatInfoStopStreamMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
+func (m *beatInfoStopStreamMessage) CheckMatch(r *bufio.Reader) (ok bool, err error) {
 	// peek length bytes and magic bytes
 	b, err := r.Peek(4 + 4)
 	if err != nil {
@@ -549,7 +506,7 @@ func (m *beatInfoStopStreamMessage) checkMatch(r *bufio.Reader) (ok bool, err er
 	return
 }
 
-func (m *beatInfoStopStreamMessage) readFrom(r io.Reader) (err error) {
+func (m *beatInfoStopStreamMessage) ReadMessageFrom(r io.Reader) (err error) {
 	// read expected message length
 	var expectedLength uint32
 	if err = binary.Read(r, binary.BigEndian, &expectedLength); err != nil {
@@ -580,7 +537,7 @@ func (m *beatInfoStopStreamMessage) readFrom(r io.Reader) (err error) {
 	return
 }
 
-func (m *beatInfoStopStreamMessage) writeTo(w io.Writer) (err error) {
+func (m *beatInfoStopStreamMessage) WriteMessageTo(w io.Writer) (err error) {
 	buf := new(bytes.Buffer)
 
 	payload_len := len(beatInfoStopStreamMagicBytes)
@@ -607,14 +564,14 @@ type PlayerInfo struct {
 }
 
 type beatEmitMessage struct {
-	//Length uint32
-	//Magic []byte = {0x00,0x00,0x00,0x02}
+	// Length uint32
+	// Magic []byte = {0x00,0x00,0x00,0x02}
 	Clock     uint64
 	Players   []PlayerInfo
 	Timelines []float64
 }
 
-func (m *beatEmitMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
+func (m *beatEmitMessage) CheckMatch(r *bufio.Reader) (ok bool, err error) {
 	// peek length bytes and magic bytes
 	b, err := r.Peek(4 + 4)
 	if err != nil {
@@ -627,7 +584,7 @@ func (m *beatEmitMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
 	return
 }
 
-func (m *beatEmitMessage) readFrom(r io.Reader) (err error) {
+func (m *beatEmitMessage) ReadMessageFrom(r io.Reader) (err error) {
 	// read expected message length
 	var expectedLength uint32
 	if err = binary.Read(r, binary.BigEndian, &expectedLength); err != nil {
@@ -706,7 +663,7 @@ func (m *beatEmitMessage) readFrom(r io.Reader) (err error) {
 	return
 }
 
-func (m *beatEmitMessage) writeTo(w io.Writer) (err error) {
+func (m *beatEmitMessage) WriteMessageTo(w io.Writer) (err error) {
 	// sanity check number of records
 	numRecords := len(m.Players)
 	if numRecords != len(m.Timelines) {
@@ -775,7 +732,7 @@ const (
 
 // discoveryMessage contains the data carried in the message payload for device trying to handshake the StagelinQ protocol to any other device in the network.
 type discoveryMessage struct {
-	tokenPrefixedMessage
+	messages.TokenPrefixedMessage
 	Source          string
 	Action          discovererMessageAction
 	SoftwareName    string
@@ -785,7 +742,7 @@ type discoveryMessage struct {
 
 var discoveryMagic = []byte("airD")
 
-func (m *discoveryMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
+func (m *discoveryMessage) CheckMatch(r *bufio.Reader) (ok bool, err error) {
 	var readMagic []byte
 	if readMagic, err = r.Peek(4); err != nil {
 		return
@@ -794,7 +751,7 @@ func (m *discoveryMessage) checkMatch(r *bufio.Reader) (ok bool, err error) {
 	return
 }
 
-func (m *discoveryMessage) readFrom(r io.Reader) (err error) {
+func (m *discoveryMessage) ReadMessageFrom(r io.Reader) (err error) {
 	readMagic := make([]byte, 4)
 	if _, err = r.Read(readMagic); err != nil {
 		return
@@ -802,44 +759,44 @@ func (m *discoveryMessage) readFrom(r io.Reader) (err error) {
 		err = ErrInvalidMessageReceived
 		return
 	}
-	if err = m.tokenPrefixedMessage.readFrom(r); err != nil {
+	if err = m.TokenPrefixedMessage.ReadMessageFrom(r); err != nil {
 		return
 	}
-	if err = readNetworkString(r, &m.Source); err != nil {
+	if err = messages.ReadUTF16NetworkString(r, &m.Source); err != nil {
 		return
 	}
 	actionString := ""
-	if err = readNetworkString(r, &actionString); err != nil {
+	if err = messages.ReadUTF16NetworkString(r, &actionString); err != nil {
 		return
 	}
 	m.Action = discovererMessageAction(actionString)
-	if err = readNetworkString(r, &m.SoftwareName); err != nil {
+	if err = messages.ReadUTF16NetworkString(r, &m.SoftwareName); err != nil {
 		return
 	}
-	if err = readNetworkString(r, &m.SoftwareVersion); err != nil {
+	if err = messages.ReadUTF16NetworkString(r, &m.SoftwareVersion); err != nil {
 		return
 	}
 	err = binary.Read(r, binary.BigEndian, &m.Port)
 	return
 }
 
-func (m *discoveryMessage) writeTo(w io.Writer) (err error) {
+func (m *discoveryMessage) WriteMessageTo(w io.Writer) (err error) {
 	if _, err = w.Write(discoveryMagic); err != nil {
 		return
 	}
-	if err = m.tokenPrefixedMessage.writeTo(w); err != nil {
+	if err = m.TokenPrefixedMessage.WriteMessageTo(w); err != nil {
 		return
 	}
-	if err = writeNetworkString(w, m.Source); err != nil {
+	if err = messages.WriteUTF16NetworkString(w, m.Source); err != nil {
 		return
 	}
-	if err = writeNetworkString(w, string(m.Action)); err != nil {
+	if err = messages.WriteUTF16NetworkString(w, string(m.Action)); err != nil {
 		return
 	}
-	if err = writeNetworkString(w, m.SoftwareName); err != nil {
+	if err = messages.WriteUTF16NetworkString(w, m.SoftwareName); err != nil {
 		return
 	}
-	if err = writeNetworkString(w, m.SoftwareVersion); err != nil {
+	if err = messages.WriteUTF16NetworkString(w, m.SoftwareVersion); err != nil {
 		return
 	}
 	if err = binary.Write(w, binary.BigEndian, m.Port); err != nil {
