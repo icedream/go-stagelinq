@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package enginelibrary.v1;
+
+option go_package = "github.com/icedream/go-stagelinq/eaas/proto/enginelibrary";
+
+import "proto/enginelibrary/library.proto";
+
+message Event {
+  oneof data {
+    EventPlaylistHierarchyChanged playlist_hierarchy_changed = 3;
+    EventPlaylistsContentChanged playlists_content_changed = 4;
+    EventTrackMetadataChanged track_metadata_changed = 5;
+    EventTrackPerformanceDataChanged track_performance_data_changed = 6;
+  }
+  optional string library_id = 1;
+  optional string device_id = 2;
+}
+
+message EventAck {
+  optional uint64 event_id = 1;
+  optional string device_id = 2;
+}
+
+message EventPlaylistHierarchyChanged {}
+
+message EventPlaylistsContentChanged { repeated string playlist_id = 1; }
+
+message EventTrackMetadataChanged { repeated TrackMetadata track_metadata = 1; }
+
+message EventTrackPerformanceDataChanged {
+  repeated TrackPerformanceData track_performance_data = 1;
+}
