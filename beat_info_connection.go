@@ -2,6 +2,8 @@ package stagelinq
 
 import (
 	"net"
+
+	"github.com/icedream/go-stagelinq/internal/socket"
 )
 
 // BeatInfo represents a received BeatInfo message.
@@ -38,7 +40,7 @@ func NewBeatInfoConnection(conn net.Conn, token Token) (bic *BeatInfoConnection,
 			Token: token,
 		},
 		Service: "BeatInfo",
-		Port:    uint16(getPort(conn.LocalAddr())),
+		Port:    uint16(socket.GetPort(conn.LocalAddr())),
 	})
 
 	go func() {

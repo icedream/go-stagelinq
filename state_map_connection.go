@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net"
 	"strings"
+
+	"github.com/icedream/go-stagelinq/internal/socket"
 )
 
 // State represents a received state value.
@@ -45,7 +47,7 @@ func NewStateMapConnection(conn net.Conn, token Token) (smc *StateMapConnection,
 			Token: token,
 		},
 		Service: "StateMap",
-		Port:    uint16(getPort(conn.LocalAddr())),
+		Port:    uint16(socket.GetPort(conn.LocalAddr())),
 	})
 
 	go func() {

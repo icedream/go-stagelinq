@@ -27,3 +27,14 @@ func makeBroadcastIP(ip net.IP, mask net.IPMask) (bip net.IP) {
 
 	return
 }
+
+func GetPort(address net.Addr) int {
+	switch convertedAddress := address.(type) {
+	case *net.UDPAddr:
+		return convertedAddress.Port
+	case *net.TCPAddr:
+		return convertedAddress.Port
+	default:
+		panic("unsupported network address type")
+	}
+}
