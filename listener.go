@@ -8,6 +8,8 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"github.com/icedream/go-stagelinq/internal/socket"
 )
 
 // ErrTooShortDiscoveryMessageReceived is returned by Listener.Discover if a
@@ -43,44 +45,6 @@ func makeStagelinqDiscoveryBroadcastAddress(ip net.IP) *net.UDPAddr {
 		IP:   ip,
 		Port: 51337,
 	}
-}
-
-func getAllBroadcastIPs() (retval []net.IP, err error) {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return
-	}
-
-	ips := []net.IP{}
-addrsLoop:
-	for _, addr := range addrs {
-		var ip net.IP
-		var mask net.IPMask
-		switch v := addr.(type) {
-		case *net.IPAddr:
-			ip = v.IP
-			mask = v.IP.DefaultMask()
-		case *net.IPNet:
-			ip = v.IP
-			mask = v.Mask
-		}
-		if ip == nil {
-			continue
-		}
-
-		// prevent addresses from being added multiple times (for example zeroconf)
-		bip := makeBroadcastIP(ip, mask)
-		for _, alreadyAddedIP := range ips {
-			if alreadyAddedIP.Equal(bip) {
-				continue addrsLoop
-			}
-		}
-
-		ips = append(ips, bip)
-	}
-
-	retval = ips
-	return
 }
 
 // Listener listens on UDP port 51337 for StagelinQ devices and announces itself in the same way.
@@ -181,7 +145,7 @@ func (l *Listener) announce(action discovererMessageAction) (err error) {
 		return
 	}
 	finalBytes := b.Bytes()
-	ips, err := getAllBroadcastIPs()
+	ips, err := socket.GetAllBroadcastIPs()
 	if err != nil {
 		return
 	}
