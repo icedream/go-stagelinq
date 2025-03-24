@@ -47,7 +47,7 @@ func NewStateMapConnection(conn net.Conn, token Token) (smc *StateMapConnection,
 			Token: token,
 		},
 		Service: "StateMap",
-		Port:    uint16(socket.GetPort(conn.LocalAddr())),
+		Port:    socket.GetPort(conn.LocalAddr()),
 	})
 
 	go func() {

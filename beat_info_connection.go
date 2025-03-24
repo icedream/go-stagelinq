@@ -40,7 +40,7 @@ func NewBeatInfoConnection(conn net.Conn, token Token) (bic *BeatInfoConnection,
 			Token: token,
 		},
 		Service: "BeatInfo",
-		Port:    uint16(socket.GetPort(conn.LocalAddr())),
+		Port:    socket.GetPort(conn.LocalAddr()),
 	})
 
 	go func() {
