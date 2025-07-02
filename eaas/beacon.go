@@ -94,7 +94,7 @@ func (l *Beacon) replyIPv4(controlMessage *ipv4.ControlMessage, srcAddr net.Addr
 		if err != nil {
 			return err
 		}
-		ip = socket.GetIPFromAddress(interfaceAddresses[0])
+		ip = socket.GetIP(interfaceAddresses[0])
 	} else {
 		// Long path - figure out any IP-based path that works for the source to
 		// reach us
@@ -112,9 +112,9 @@ func (l *Beacon) replyIPv4(controlMessage *ipv4.ControlMessage, srcAddr net.Addr
 			allInterfaceAddresses = append(allInterfaceAddresses, interfaceAddresses...)
 		}
 		// Pick the first interface IP that could talk straight to the source
-		srcIP := socket.GetIPFromAddress(srcAddr)
+		srcIP := socket.GetIP(srcAddr)
 		for _, interfaceAddr := range allInterfaceAddresses {
-			interfaceIP := socket.GetIPFromAddress(interfaceAddr)
+			interfaceIP := socket.GetIP(interfaceAddr)
 			interfaceMask := socket.GetMaskFromAddress(interfaceAddr)
 			intfnet := &net.IPNet{
 				IP:   interfaceIP,

@@ -4,7 +4,7 @@ import (
 	"net"
 )
 
-func GetIPFromAddress(address net.Addr) net.IP {
+func GetIP(address net.Addr) net.IP {
 	switch convertedAddress := address.(type) {
 	case *net.UDPAddr:
 		return convertedAddress.IP
