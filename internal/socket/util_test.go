@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_makeBroadcastIP(t *testing.T) {
+func Test_MakeBroadcastIP(t *testing.T) {
 	testValues := []struct {
 		IP            net.IP
 		Mask          net.IPMask
