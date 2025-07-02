@@ -144,19 +144,21 @@ func Test_MessageConnection_Read(t *testing.T) {
 		return
 	}
 
-	go func() {
+	{
 		conn, err := net.Dial("tcp", listener.Addr().String())
 		if err != nil {
 			t.Fatalf("Failed to set up test connection: %s", err.Error())
 			return
 		}
-		for _, testMessage := range testMessages {
-			_, err := conn.Write(testMessage.Bytes)
-			if err != nil {
-				t.Fatalf("Failed to write bytes: %s", err.Error())
+		go func() {
+			for _, testMessage := range testMessages {
+				_, err := conn.Write(testMessage.Bytes)
+				if err != nil {
+					t.Logf("Failed to write bytes: %s", err.Error())
+				}
 			}
-		}
-	}()
+		}()
+	}
 
 	conn, err := listener.Accept()
 	if err != nil {
@@ -193,20 +195,21 @@ func Test_MessageConnection(t *testing.T) {
 		return
 	}
 
-	go func() {
+	{
 		conn, err := net.Dial("tcp", listener.Addr().String())
 		if err != nil {
 			t.Fatalf("Failed to set up test connection: %s", err.Error())
 			return
 		}
+		go func() {
+			msgConn := newMessageConnection(conn, newDeviceConnMessageSet(testMessages))
 
-		msgConn := newMessageConnection(conn, newDeviceConnMessageSet(testMessages))
-
-		for _, testMessage := range testMessages {
-			err := msgConn.WriteMessage(testMessage)
-			require.Nil(t, err)
-		}
-	}()
+			for _, testMessage := range testMessages {
+				err := msgConn.WriteMessage(testMessage)
+				require.Nil(t, err)
+			}
+		}()
+	}
 
 	conn, err := listener.Accept()
 	if err != nil {
