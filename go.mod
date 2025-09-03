@@ -2,7 +2,7 @@ module github.com/icedream/go-stagelinq
 
 go 1.23.0
 
-toolchain go1.24.3
+toolchain go1.25.1
 
 require (
 	github.com/bufbuild/buf v1.54.0
