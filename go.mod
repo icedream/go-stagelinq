@@ -15,7 +15,7 @@ require (
 	golang.org/x/net v0.40.0
 	golang.org/x/text v0.26.0
 	google.golang.org/grpc v1.73.0
-	google.golang.org/protobuf v1.36.6
+	google.golang.org/protobuf v1.36.9
 )
 
 require (
