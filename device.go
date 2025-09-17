@@ -58,6 +58,11 @@ func (device *Device) IsEqual(anotherDevice *Device) bool {
 		device.SoftwareVersion == anotherDevice.SoftwareVersion
 }
 
+// Token returns the unique token for the device.
+func (device *Device) Token() Token {
+	return device.token
+}
+
 func newDeviceFromDiscovery(addr *net.UDPAddr, msg *discoveryMessage) *Device {
 	return &Device{
 		port:  msg.Port,
