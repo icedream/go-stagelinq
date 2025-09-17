@@ -1,3 +1,3 @@
 package eaas
 
-//go:generate go run -mod=mod github.com/bufbuild/buf/cmd/buf generate
+//go:generate go tool github.com/bufbuild/buf/cmd/buf generate
