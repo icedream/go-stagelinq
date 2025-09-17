@@ -9,7 +9,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/lithammer/fuzzysearch v1.1.8
-	github.com/rivo/tview v0.0.0-20250625164341-a4a78f1e05cb
+	github.com/rivo/tview v0.42.0
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/net v0.44.0
 	golang.org/x/text v0.29.0
