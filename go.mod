@@ -2,7 +2,7 @@ module github.com/icedream/go-stagelinq
 
 go 1.25.6
 
-toolchain go1.26.1
+toolchain go1.26.2
 
 require (
 	github.com/dhowden/tag v0.0.0-20240417053706-3d75831295e8
