@@ -4,6 +4,7 @@ import "fmt"
 
 const (
 	ClientLibrarianDevicesControllerCurrentDevice         = "/Client/Librarian/DevicesController/CurrentDevice"
+	ClientLibrarianDevicesControllerCurrentDeviceArtwork  = "/Client/Librarian/DevicesController/CurrentDeviceArtwork"
 	ClientLibrarianDevicesControllerHasSDCardConnected    = "/Client/Librarian/DevicesController/HasSDCardConnected"
 	ClientLibrarianDevicesControllerHasUsbDeviceConnected = "/Client/Librarian/DevicesController/HasUsbDeviceConnected"
 	ClientPreferencesLayerA                               = "/Client/Preferences/LayerA"
@@ -24,21 +25,31 @@ const (
 	ClientPreferencesProfileApplicationPlayerColor4A      = "/Client/Preferences/Profile/Application/PlayerColor4A"
 	ClientPreferencesProfileApplicationPlayerColor4B      = "/Client/Preferences/Profile/Application/PlayerColor4B"
 	ClientPreferencesProfileApplicationSyncMode           = "/Client/Preferences/Profile/Application/SyncMode"
-	EngineDeckCount                                       = "/Engine/DeckCount"
-	EngineMasterMasterTempo                               = "/Engine/Master/MasterTempo"
-	EngineSyncNetworkMasterStatus                         = "/Engine/Sync/Network/MasterStatus"
-	GUIDecksDeckActiveDeck                                = "/GUI/Decks/Deck/ActiveDeck"
-	GUIViewLayerLayerB                                    = "/GUI/ViewLayer/LayerB"
-	MixerCH1faderPosition                                 = "/Mixer/CH1faderPosition"
-	MixerCH2faderPosition                                 = "/Mixer/CH2faderPosition"
-	MixerCH3faderPosition                                 = "/Mixer/CH3faderPosition"
-	MixerCH4faderPosition                                 = "/Mixer/CH4faderPosition"
-	MixerChannelAssignment1                               = "/Mixer/ChannelAssignment1"
-	MixerChannelAssignment2                               = "/Mixer/ChannelAssignment2"
-	MixerChannelAssignment3                               = "/Mixer/ChannelAssignment3"
-	MixerChannelAssignment4                               = "/Mixer/ChannelAssignment4"
-	MixerCrossfaderPosition                               = "/Mixer/CrossfaderPosition"
-	MixerNumberOfChannels                                 = "/Mixer/NumberOfChannels"
+	// ClientPreferencesScreenBrightnessPluggedIn is the screen brightness
+	// setting when the device is connected to power. Values: "Low", "Mid",
+	// "High", "Max".
+	ClientPreferencesScreenBrightnessPluggedIn = "/Client/Preferences/ScreenBrightnessPluggedIn"
+	// ConfigurationComputerMode indicates that the device is in computer
+	// (controller) mode. Set to true by the host to activate the computer
+	// mode UI on the device.
+	ConfigurationComputerMode             = "/Configuration/ComputerMode"
+	EngineDeckCount                       = "/Engine/DeckCount"
+	EngineMasterMasterTempo               = "/Engine/Master/MasterTempo"
+	EngineMixerAutoPFLDeckIndex           = "/Engine/Mixer/AutoPFLDeckIndex"
+	EngineSyncNetworkMasterStatus         = "/Engine/Sync/Network/MasterStatus"
+	GUIDecksDeckActiveDeck                = "/GUI/Decks/Deck/ActiveDeck"
+	GUIScriptedRunningDark                = "/GUI/Scripted/RunningDark"
+	GUIViewLayerLayerB                    = "/GUI/ViewLayer/LayerB"
+	MixerCH1faderPosition                 = "/Mixer/CH1faderPosition"
+	MixerCH2faderPosition                 = "/Mixer/CH2faderPosition"
+	MixerCH3faderPosition                 = "/Mixer/CH3faderPosition"
+	MixerCH4faderPosition                 = "/Mixer/CH4faderPosition"
+	MixerChannelAssignment1               = "/Mixer/ChannelAssignment1"
+	MixerChannelAssignment2               = "/Mixer/ChannelAssignment2"
+	MixerChannelAssignment3               = "/Mixer/ChannelAssignment3"
+	MixerChannelAssignment4               = "/Mixer/ChannelAssignment4"
+	MixerCrossfaderPosition               = "/Mixer/CrossfaderPosition"
+	MixerNumberOfChannels                 = "/Mixer/NumberOfChannels"
 )
 
 // Deck 1 legacy variables
@@ -626,4 +637,113 @@ func (n *DeckValueNames) SpeedState() string {
 
 func (n *DeckValueNames) SyncMode() string {
 	return fmt.Sprintf("/Engine/Deck%d/SyncMode", n.DeckIndex)
+}
+
+// AlbumArt returns the StateMap path for the album artwork bytes of the loaded
+// track. The value is a binary blob (JPEG or PNG).
+func (n *DeckValueNames) AlbumArt() string {
+	return fmt.Sprintf("/Engine/Deck%d/AlbumArt", n.DeckIndex)
+}
+
+// JogColor returns the StateMap path for the deck's jog wheel accent color.
+func (n *DeckValueNames) JogColor() string {
+	return fmt.Sprintf("/Engine/Deck%d/JogColor", n.DeckIndex)
+}
+
+// TrackSlipModeActive returns the StateMap path for whether slip mode is active
+// on this deck.
+func (n *DeckValueNames) TrackSlipModeActive() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/SlipModeActive", n.DeckIndex)
+}
+
+// TrackAutoLoopIndex returns the StateMap path for the current auto-loop size
+// index (into the device's loop size list).
+func (n *DeckValueNames) TrackAutoLoopIndex() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/AutoLoopIndex", n.DeckIndex)
+}
+
+// TrackAutoLoopLabel returns the StateMap path for the human-readable label of
+// auto-loop slot n (1-based). E.g. "1/4", "1", "8".
+func (n *DeckValueNames) TrackAutoLoopLabel(slot int) string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/AutoLoopLabel%d", n.DeckIndex, slot)
+}
+
+// TrackBeatJumpIndex returns the StateMap path for the current beat-jump size
+// index.
+func (n *DeckValueNames) TrackBeatJumpIndex() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/BeatJump/BeatJumpIndex", n.DeckIndex)
+}
+
+// TrackBeatJumpLabel returns the StateMap path for the human-readable label of
+// beat-jump slot n (1-based). E.g. "1", "2", "4".
+func (n *DeckValueNames) TrackBeatJumpLabel(slot int) string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/BeatJump/BeatJumpLabel%d", n.DeckIndex, slot)
+}
+
+// TrackLoopActive returns the StateMap path for whether a loop is currently
+// active (playing) on this deck.
+func (n *DeckValueNames) TrackLoopActive() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/Loop/Active", n.DeckIndex)
+}
+
+// TrackLoopLoopEnabledPosition returns the StateMap path for the loop-in
+// position when a loop is armed or active.
+func (n *DeckValueNames) TrackLoopLoopEnabledPosition() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/Loop/LoopEnabledPosition", n.DeckIndex)
+}
+
+// TrackLoopLoopOutPosition returns the StateMap path for the loop-out point
+// position.
+func (n *DeckValueNames) TrackLoopLoopOutPosition() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/Loop/LoopOutPosition", n.DeckIndex)
+}
+
+// TrackTrackDataPlayheadPosition returns the StateMap path for the current
+// playhead position in seconds.
+func (n *DeckValueNames) TrackTrackDataPlayheadPosition() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/TrackData/PlayheadPosition", n.DeckIndex)
+}
+
+// TrackTrackDataTrackLength returns the StateMap path for the total track
+// length in seconds (from TrackData, more precise than TrackTrackLength).
+func (n *DeckValueNames) TrackTrackDataTrackLength() string {
+	return fmt.Sprintf("/Engine/Deck%d/Track/TrackData/TrackLength", n.DeckIndex)
+}
+
+// MixerChannelValueNames provides StateMap path helpers for a specific mixer
+// channel (1-based).
+type MixerChannelValueNames struct {
+	ChannelIndex int
+}
+
+var (
+	EngineMixerChannel1 = MixerChannelValueNames{ChannelIndex: 1}
+	EngineMixerChannel2 = MixerChannelValueNames{ChannelIndex: 2}
+	EngineMixerChannel3 = MixerChannelValueNames{ChannelIndex: 3}
+	EngineMixerChannel4 = MixerChannelValueNames{ChannelIndex: 4}
+)
+
+// PFL returns the StateMap path for the pre-fader listen (cue) state of this
+// mixer channel.
+func (m *MixerChannelValueNames) PFL() string {
+	return fmt.Sprintf("/Engine/Mixer/Channel%d/PFL", m.ChannelIndex)
+}
+
+// Line returns the StateMap path for whether this mixer channel is in line-in
+// mode (as opposed to USB/track playback).
+func (m *MixerChannelValueNames) Line() string {
+	return fmt.Sprintf("/Engine/Mixer/Channel%d/Line", m.ChannelIndex)
+}
+
+// AutoGain returns the StateMap path for the auto-gain value of this mixer
+// channel.
+func (m *MixerChannelValueNames) AutoGain() string {
+	return fmt.Sprintf("/Engine/Mixer/Channel%d/AutoGain", m.ChannelIndex)
+}
+
+// GUIDecksSideActiveDeck returns the StateMap path for the active deck index
+// on a given side ("Left" or "Right"). This path resolves which deck is
+// currently displayed on the left or right side of the device UI.
+func GUIDecksSideActiveDeck(side string) string {
+	return fmt.Sprintf("/GUI/Decks/Deck%s/ActiveDeck", side)
 }
