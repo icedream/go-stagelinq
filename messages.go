@@ -143,8 +143,8 @@ func (m *servicesRequestMessage) WriteMessageTo(w io.Writer) (err error) {
 	return
 }
 
-// TODO - StateSubscribeMessage.Interval: Check what Interval actually is, it seems to either be 00 00 00 00 (Resolume Arena) or 00 00 00 0a (SoundSwitch)
-
+// smaaMagicBytes is the 4-byte "smaa" framing prefix used by the StateMap
+// service wire format.
 var smaaMagicBytes = []byte{0x73, 0x6d, 0x61, 0x61}
 
 func checkSmaa(r *bufio.Reader, id int32) (ok bool, err error) {
@@ -167,11 +167,27 @@ func checkSmaa(r *bufio.Reader, id int32) (ok bool, err error) {
 	return
 }
 
+const (
+	// smaaMessageTypeSubscribe is the 4-byte message type ID for a subscribe
+	// request in the StateMap protocol (client -> server).
+	smaaMessageTypeSubscribe uint32 = 0x000007d2
+
+	// smaaMessageTypeSubscribeResponse is the 4-byte message type ID for a
+	// subscribe acknowledgement in the StateMap protocol (server -> client).
+	smaaMessageTypeSubscribeResponse uint32 = 0x000007d1
+
+	// smaaMessageTypeEmit is the 4-byte message type ID for a state value
+	// emission in the StateMap protocol (server -> client).
+	smaaMessageTypeEmit uint32 = 0x00000000
+)
+
 type stateSubscribeMessage struct {
-	// Length uint32
-	// Unknown []byte = {0x73,0x6d,0x61,0x61}
-	// Unknown2 []byte = {0x00,0x00,0x07,0xd2}
-	Name     string
+	// Name is the state name that values should be emitted for.
+	Name string
+
+	// Interval is the requested minimum update interval in milliseconds.
+	// 0 means the subscriber only wants event-driven updates (on change).
+	// A non-zero value requests periodic updates at least this often.
 	Interval uint32
 }
 
@@ -195,12 +211,12 @@ func (m *stateSubscribeMessage) ReadMessageFrom(r io.Reader) (err error) {
 		return
 	}
 
-	// TODO - figure this out
+	// read and validate message type
 	if _, err = r.Read(magicBytes); err != nil {
 		return
 	}
-	if !bytes.Equal(magicBytes, []byte{0x00, 0x00, 0x07, 0xd2}) {
-		err = errors.New("invalid post-smaa magic bytes")
+	if binary.BigEndian.Uint32(magicBytes) != smaaMessageTypeSubscribe {
+		err = errors.New("invalid smaa message type for subscribe")
 		return
 	}
 
@@ -209,20 +225,19 @@ func (m *stateSubscribeMessage) ReadMessageFrom(r io.Reader) (err error) {
 		return
 	}
 
-	// TODO - figure this out
+	// read minimum update interval
 	err = binary.Read(r, binary.BigEndian, &m.Interval)
 	return
 }
 
 func (m *stateSubscribeMessage) WriteMessageTo(w io.Writer) (err error) {
-	// write smaa magic bytes
 	buf := new(bytes.Buffer)
 	if _, err = buf.Write(smaaMagicBytes); err != nil {
 		return
 	}
 
-	// TODO - figure this out
-	if _, err = buf.Write([]byte{0x00, 0x00, 0x07, 0xd2}); err != nil {
+	// write message type ID
+	if err = binary.Write(buf, binary.BigEndian, uint32(smaaMessageTypeSubscribe)); err != nil {
 		return
 	}
 
@@ -231,7 +246,7 @@ func (m *stateSubscribeMessage) WriteMessageTo(w io.Writer) (err error) {
 		return
 	}
 
-	// TODO - figure this out
+	// write minimum update interval
 	if err = binary.Write(buf, binary.BigEndian, m.Interval); err != nil {
 		return
 	}
@@ -247,10 +262,13 @@ func (m *stateSubscribeMessage) WriteMessageTo(w io.Writer) (err error) {
 }
 
 type stateEmitResponseMessage struct {
-	// Length uint32
-	// Unknown []byte = {0x73,0x6d,0x61,0x61}
-	// Unknown2 []byte = {0x00,0x00,0x07,0xd1}
-	Name     string
+	// Name is the state name that values will be emitted for.
+	Name string
+
+	// Interval is the confirmed minimum update interval echoed back from
+	// the server in response to a subscription request.
+	// 0 means the subscriber only wants event-driven updates (on change).
+	// A non-zero value requests periodic updates at least this often.
 	Interval uint32
 }
 
@@ -274,12 +292,12 @@ func (m *stateEmitResponseMessage) ReadMessageFrom(r io.Reader) (err error) {
 		return
 	}
 
-	// TODO - figure this out
+	// read and validate message type
 	if _, err = r.Read(magicBytes); err != nil {
 		return
 	}
-	if !bytes.Equal(magicBytes, []byte{0x00, 0x00, 0x07, 0xd1}) {
-		err = errors.New("invalid post-smaa magic bytes")
+	if binary.BigEndian.Uint32(magicBytes) != smaaMessageTypeSubscribeResponse {
+		err = errors.New("invalid smaa message type for subscribe response")
 		return
 	}
 
@@ -288,20 +306,19 @@ func (m *stateEmitResponseMessage) ReadMessageFrom(r io.Reader) (err error) {
 		return
 	}
 
-	// TODO - figure this out
+	// read confirmed minimum update interval
 	err = binary.Read(r, binary.BigEndian, &m.Interval)
 	return
 }
 
 func (m *stateEmitResponseMessage) WriteMessageTo(w io.Writer) (err error) {
-	// write smaa magic bytes
 	buf := new(bytes.Buffer)
 	if _, err = buf.Write(smaaMagicBytes); err != nil {
 		return
 	}
 
-	// TODO - figure this out
-	if _, err = buf.Write([]byte{0x00, 0x00, 0x07, 0xd1}); err != nil {
+	// write message type ID
+	if err = binary.Write(buf, binary.BigEndian, uint32(smaaMessageTypeSubscribeResponse)); err != nil {
 		return
 	}
 
@@ -310,7 +327,7 @@ func (m *stateEmitResponseMessage) WriteMessageTo(w io.Writer) (err error) {
 		return
 	}
 
-	// TODO - figure this out
+	// write confirmed minimum update interval
 	if err = binary.Write(buf, binary.BigEndian, m.Interval); err != nil {
 		return
 	}
@@ -326,10 +343,10 @@ func (m *stateEmitResponseMessage) WriteMessageTo(w io.Writer) (err error) {
 }
 
 type stateEmitMessage struct {
-	// Length uint32
-	// Unknown []byte = {0x73,0x6d,0x61,0x61}
-	// Unknown2 []byte = {0x00,0x00,0x00,0x00}
+	// Name is the state name for which a value is emitted.
 	Name string
+
+	// JSON is the JSON representation of the value.
 	JSON string
 }
 
@@ -366,12 +383,12 @@ func (m *stateEmitMessage) ReadMessageFrom(r io.Reader) (err error) {
 		return
 	}
 
-	// TODO - figure this out
+	// read and validate message type
 	if _, err = msgReader.Read(magicBytes); err != nil {
 		return
 	}
-	if !bytes.Equal(magicBytes, []byte{0x00, 0x00, 0x00, 0x00}) {
-		err = errors.New("invalid post-smaa magic bytes")
+	if binary.BigEndian.Uint32(magicBytes) != smaaMessageTypeEmit {
+		err = errors.New("invalid smaa message type for emit")
 		return
 	}
 
@@ -396,8 +413,8 @@ func (m *stateEmitMessage) WriteMessageTo(w io.Writer) (err error) {
 		return
 	}
 
-	// TODO - figure this out
-	if _, err = buf.Write([]byte{0x00, 0x00, 0x00, 0x00}); err != nil {
+	// write message type ID
+	if err = binary.Write(buf, binary.BigEndian, uint32(smaaMessageTypeEmit)); err != nil {
 		return
 	}
 

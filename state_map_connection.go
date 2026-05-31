@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net"
 	"strings"
+	"time"
 
 	"github.com/icedream/go-stagelinq/internal/messages"
 	"github.com/icedream/go-stagelinq/internal/socket"
@@ -41,8 +42,9 @@ func NewStateMapConnection(conn net.Conn, token Token) (smc *StateMapConnection,
 		stateC: stateC,
 	}
 
-	// Before we do anything else, we announce our TCP source port in-protocol.
-	// I have observed SoundSwitch and Resolume doing this, don't know what the purpose is though.
+	// Announce our TCP source port to the device before subscribing. This
+	// registers the port the device should use to push state updates back
+	// to us (the callback/return channel).
 	msgConn.WriteMessage(&serviceAnnouncementMessage{
 		TokenPrefixedMessage: messages.TokenPrefixedMessage{
 			Token: messages.Token(token),
@@ -86,12 +88,28 @@ func NewStateMapConnection(conn net.Conn, token Token) (smc *StateMapConnection,
 	return
 }
 
-// Subscribe tells the StagelinQ device to let us know about changes for the given state value.
-func (smc *StateMapConnection) Subscribe(event string) error {
-	// TODO - check what to do with the int field in the state subscribe message, what is that?
-	return smc.conn.WriteMessage(&stateSubscribeMessage{
+// StateMapSubscriptionOption represents an option for state map subscriptions.
+type StateMapSubscriptionOption func(*stateSubscribeMessage)
+
+// WithInterval sets a minimum time interval at which the event value should be
+// resent on the wire. The default value of 0 means values are emitted only when
+// changed as an event.
+func WithInterval(d time.Duration) StateMapSubscriptionOption {
+	return func(m *stateSubscribeMessage) {
+		m.Interval = uint32(d.Milliseconds())
+	}
+}
+
+// Subscribe tells the StagelinQ device to send us updates for the given state
+// value path.
+func (smc *StateMapConnection) Subscribe(event string, opts ...StateMapSubscriptionOption) error {
+	m := &stateSubscribeMessage{
 		Name: event,
-	})
+	}
+	for _, o := range opts {
+		o(m)
+	}
+	return smc.conn.WriteMessage(m)
 }
 
 func (smc *StateMapConnection) Emit(state *State) error {
