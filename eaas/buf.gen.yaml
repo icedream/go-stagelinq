@@ -3,7 +3,7 @@ plugins:
 - plugin: buf.build/protocolbuffers/go:v1.31.0
   out: .
   opt: paths=source_relative
-- plugin: buf.build/grpc/go
+- plugin: buf.build/grpc/go:v1.5.1
   out: .
   opt: paths=source_relative
 # - name: grpc-gateway

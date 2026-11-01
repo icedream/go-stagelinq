@@ -96,42 +96,43 @@ func runEngineLibraryUI(grpcURL string) {
 		panic(err)
 	}
 	var pageSize uint32 = 25
-	getTracksResp, err := connection.GetTracks(ctx, &enginelibrary.GetTracksRequest{
-		PageSize: &pageSize,
-	})
-	if err != nil {
-		panic(err)
-	}
-	for _, track := range getTracksResp.GetTracks() {
-		log.Printf("Track: %s", string(marshalJSON(track)))
-		getTrackResp, err := connection.GetTrack(ctx, &enginelibrary.GetTrackRequest{
-			TrackId: track.GetMetadata().Id,
-		})
+	// GetTracks is server-streaming: a listing arrives as a series of batches,
+	// and an empty playlist simply ends the stream.
+	getTracks := func(req *enginelibrary.GetTracksRequest, prefix string) {
+		tracks, err := connection.GetTracks(ctx, req)
 		if err != nil {
-			log.Println("\tfailed to GetTrack on this track")
-			continue
+			log.Printf("%sfailed to GetTracks: %v", prefix, err)
+			return
 		}
-		log.Printf("\t%+v", getTrackResp)
-	}
-	for _, playlist := range getLibraryResp.GetPlaylists() {
-		log.Printf("Playlist: %s", string(marshalJSON(playlist)))
-		getTracksResp, err := connection.GetTracks(ctx, &enginelibrary.GetTracksRequest{
-			PlaylistId: playlist.Id,
-			PageSize:   &pageSize,
-		})
-		if errors.Is(err, io.EOF) {
-			// BUG - empty playlist causes EOF, reconnect
-			connection, err = eaas.DialContext(ctx, grpcURL)
+		for {
+			batch, err := tracks.Recv()
+			if errors.Is(err, io.EOF) {
+				return
+			}
 			if err != nil {
-				panic(err)
+				log.Printf("%sfailed to read tracks: %v", prefix, err)
+				return
+			}
+			for _, track := range batch.GetTracks() {
+				log.Printf("%sTrack: %s", prefix, string(marshalJSON(track)))
+				getTrackResp, err := connection.GetTrack(ctx, &enginelibrary.GetTrackRequest{
+					TrackId: track.GetMetadata().Id,
+				})
+				if err != nil {
+					log.Printf("%sfailed to GetTrack on this track", prefix)
+					continue
+				}
+				log.Printf("%s%+v", prefix, getTrackResp)
 			}
 		}
-		if err != nil {
-			panic(err)
-		}
-		for _, track := range getTracksResp.GetTracks() {
-			log.Printf("\tTrack: ID %s", track.GetMetadata().GetId())
-		}
+	}
+	getTracks(&enginelibrary.GetTracksRequest{PageSize: &pageSize}, "")
+	for _, playlist := range getLibraryResp.GetPlaylists() {
+		log.Printf("Playlist: %s", string(marshalJSON(playlist)))
+		getTracks(&enginelibrary.GetTracksRequest{
+			PlaylistId: playlist.Id,
+			PageSize:   &pageSize,
+		}, "\t")
 	}
 }
 

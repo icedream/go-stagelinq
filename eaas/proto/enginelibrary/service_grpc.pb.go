@@ -36,17 +36,17 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EngineLibraryServiceClient interface {
-	EventStream(ctx context.Context, in *EventStreamRequest, opts ...grpc.CallOption) (*EventStreamResponse, error)
+	EventStream(ctx context.Context, in *EventStreamRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[EventStreamResponse], error)
 	GetCredentials(ctx context.Context, in *GetCredentialsRequest, opts ...grpc.CallOption) (*GetCredentialsResponse, error)
 	GetLibraries(ctx context.Context, in *GetLibrariesRequest, opts ...grpc.CallOption) (*GetLibrariesResponse, error)
 	GetLibrary(ctx context.Context, in *GetLibraryRequest, opts ...grpc.CallOption) (*GetLibraryResponse, error)
-	GetTracks(ctx context.Context, in *GetTracksRequest, opts ...grpc.CallOption) (*GetTracksResponse, error)
+	GetTracks(ctx context.Context, in *GetTracksRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetTracksResponse], error)
 	GetSearchFilters(ctx context.Context, in *GetSearchFiltersRequest, opts ...grpc.CallOption) (*GetSearchFiltersResponse, error)
 	GetTrack(ctx context.Context, in *GetTrackRequest, opts ...grpc.CallOption) (*GetTrackResponse, error)
 	GetHistoryPlayedTracks(ctx context.Context, in *GetHistoryPlayedTracksRequest, opts ...grpc.CallOption) (*GetHistoryPlayedTracksResponse, error)
 	GetHistorySessions(ctx context.Context, in *GetHistorySessionsRequest, opts ...grpc.CallOption) (*GetHistorySessionsResponse, error)
 	PutEvents(ctx context.Context, in *PutEventsRequest, opts ...grpc.CallOption) (*PutEventsResponse, error)
-	SearchTracks(ctx context.Context, in *SearchTracksRequest, opts ...grpc.CallOption) (*SearchTracksResponse, error)
+	SearchTracks(ctx context.Context, in *SearchTracksRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SearchTracksResponse], error)
 }
 
 type engineLibraryServiceClient struct {
@@ -57,15 +57,24 @@ func NewEngineLibraryServiceClient(cc grpc.ClientConnInterface) EngineLibrarySer
 	return &engineLibraryServiceClient{cc}
 }
 
-func (c *engineLibraryServiceClient) EventStream(ctx context.Context, in *EventStreamRequest, opts ...grpc.CallOption) (*EventStreamResponse, error) {
+func (c *engineLibraryServiceClient) EventStream(ctx context.Context, in *EventStreamRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[EventStreamResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(EventStreamResponse)
-	err := c.cc.Invoke(ctx, EngineLibraryService_EventStream_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &EngineLibraryService_ServiceDesc.Streams[0], EngineLibraryService_EventStream_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grpc.GenericClientStream[EventStreamRequest, EventStreamResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type EngineLibraryService_EventStreamClient = grpc.ServerStreamingClient[EventStreamResponse]
 
 func (c *engineLibraryServiceClient) GetCredentials(ctx context.Context, in *GetCredentialsRequest, opts ...grpc.CallOption) (*GetCredentialsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -97,15 +106,24 @@ func (c *engineLibraryServiceClient) GetLibrary(ctx context.Context, in *GetLibr
 	return out, nil
 }
 
-func (c *engineLibraryServiceClient) GetTracks(ctx context.Context, in *GetTracksRequest, opts ...grpc.CallOption) (*GetTracksResponse, error) {
+func (c *engineLibraryServiceClient) GetTracks(ctx context.Context, in *GetTracksRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetTracksResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetTracksResponse)
-	err := c.cc.Invoke(ctx, EngineLibraryService_GetTracks_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &EngineLibraryService_ServiceDesc.Streams[1], EngineLibraryService_GetTracks_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grpc.GenericClientStream[GetTracksRequest, GetTracksResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type EngineLibraryService_GetTracksClient = grpc.ServerStreamingClient[GetTracksResponse]
 
 func (c *engineLibraryServiceClient) GetSearchFilters(ctx context.Context, in *GetSearchFiltersRequest, opts ...grpc.CallOption) (*GetSearchFiltersResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -157,31 +175,40 @@ func (c *engineLibraryServiceClient) PutEvents(ctx context.Context, in *PutEvent
 	return out, nil
 }
 
-func (c *engineLibraryServiceClient) SearchTracks(ctx context.Context, in *SearchTracksRequest, opts ...grpc.CallOption) (*SearchTracksResponse, error) {
+func (c *engineLibraryServiceClient) SearchTracks(ctx context.Context, in *SearchTracksRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SearchTracksResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SearchTracksResponse)
-	err := c.cc.Invoke(ctx, EngineLibraryService_SearchTracks_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &EngineLibraryService_ServiceDesc.Streams[2], EngineLibraryService_SearchTracks_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grpc.GenericClientStream[SearchTracksRequest, SearchTracksResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type EngineLibraryService_SearchTracksClient = grpc.ServerStreamingClient[SearchTracksResponse]
 
 // EngineLibraryServiceServer is the server API for EngineLibraryService service.
 // All implementations must embed UnimplementedEngineLibraryServiceServer
 // for forward compatibility.
 type EngineLibraryServiceServer interface {
-	EventStream(context.Context, *EventStreamRequest) (*EventStreamResponse, error)
+	EventStream(*EventStreamRequest, grpc.ServerStreamingServer[EventStreamResponse]) error
 	GetCredentials(context.Context, *GetCredentialsRequest) (*GetCredentialsResponse, error)
 	GetLibraries(context.Context, *GetLibrariesRequest) (*GetLibrariesResponse, error)
 	GetLibrary(context.Context, *GetLibraryRequest) (*GetLibraryResponse, error)
-	GetTracks(context.Context, *GetTracksRequest) (*GetTracksResponse, error)
+	GetTracks(*GetTracksRequest, grpc.ServerStreamingServer[GetTracksResponse]) error
 	GetSearchFilters(context.Context, *GetSearchFiltersRequest) (*GetSearchFiltersResponse, error)
 	GetTrack(context.Context, *GetTrackRequest) (*GetTrackResponse, error)
 	GetHistoryPlayedTracks(context.Context, *GetHistoryPlayedTracksRequest) (*GetHistoryPlayedTracksResponse, error)
 	GetHistorySessions(context.Context, *GetHistorySessionsRequest) (*GetHistorySessionsResponse, error)
 	PutEvents(context.Context, *PutEventsRequest) (*PutEventsResponse, error)
-	SearchTracks(context.Context, *SearchTracksRequest) (*SearchTracksResponse, error)
+	SearchTracks(*SearchTracksRequest, grpc.ServerStreamingServer[SearchTracksResponse]) error
 	mustEmbedUnimplementedEngineLibraryServiceServer()
 }
 
@@ -192,8 +219,8 @@ type EngineLibraryServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedEngineLibraryServiceServer struct{}
 
-func (UnimplementedEngineLibraryServiceServer) EventStream(context.Context, *EventStreamRequest) (*EventStreamResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method EventStream not implemented")
+func (UnimplementedEngineLibraryServiceServer) EventStream(*EventStreamRequest, grpc.ServerStreamingServer[EventStreamResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method EventStream not implemented")
 }
 func (UnimplementedEngineLibraryServiceServer) GetCredentials(context.Context, *GetCredentialsRequest) (*GetCredentialsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCredentials not implemented")
@@ -204,8 +231,8 @@ func (UnimplementedEngineLibraryServiceServer) GetLibraries(context.Context, *Ge
 func (UnimplementedEngineLibraryServiceServer) GetLibrary(context.Context, *GetLibraryRequest) (*GetLibraryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLibrary not implemented")
 }
-func (UnimplementedEngineLibraryServiceServer) GetTracks(context.Context, *GetTracksRequest) (*GetTracksResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTracks not implemented")
+func (UnimplementedEngineLibraryServiceServer) GetTracks(*GetTracksRequest, grpc.ServerStreamingServer[GetTracksResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method GetTracks not implemented")
 }
 func (UnimplementedEngineLibraryServiceServer) GetSearchFilters(context.Context, *GetSearchFiltersRequest) (*GetSearchFiltersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSearchFilters not implemented")
@@ -222,8 +249,8 @@ func (UnimplementedEngineLibraryServiceServer) GetHistorySessions(context.Contex
 func (UnimplementedEngineLibraryServiceServer) PutEvents(context.Context, *PutEventsRequest) (*PutEventsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PutEvents not implemented")
 }
-func (UnimplementedEngineLibraryServiceServer) SearchTracks(context.Context, *SearchTracksRequest) (*SearchTracksResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchTracks not implemented")
+func (UnimplementedEngineLibraryServiceServer) SearchTracks(*SearchTracksRequest, grpc.ServerStreamingServer[SearchTracksResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method SearchTracks not implemented")
 }
 func (UnimplementedEngineLibraryServiceServer) mustEmbedUnimplementedEngineLibraryServiceServer() {}
 func (UnimplementedEngineLibraryServiceServer) testEmbeddedByValue()                              {}
@@ -246,23 +273,16 @@ func RegisterEngineLibraryServiceServer(s grpc.ServiceRegistrar, srv EngineLibra
 	s.RegisterService(&EngineLibraryService_ServiceDesc, srv)
 }
 
-func _EngineLibraryService_EventStream_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EventStreamRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _EngineLibraryService_EventStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(EventStreamRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(EngineLibraryServiceServer).EventStream(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: EngineLibraryService_EventStream_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EngineLibraryServiceServer).EventStream(ctx, req.(*EventStreamRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(EngineLibraryServiceServer).EventStream(m, &grpc.GenericServerStream[EventStreamRequest, EventStreamResponse]{ServerStream: stream})
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type EngineLibraryService_EventStreamServer = grpc.ServerStreamingServer[EventStreamResponse]
 
 func _EngineLibraryService_GetCredentials_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetCredentialsRequest)
@@ -318,23 +338,16 @@ func _EngineLibraryService_GetLibrary_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EngineLibraryService_GetTracks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTracksRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _EngineLibraryService_GetTracks_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetTracksRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(EngineLibraryServiceServer).GetTracks(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: EngineLibraryService_GetTracks_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EngineLibraryServiceServer).GetTracks(ctx, req.(*GetTracksRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(EngineLibraryServiceServer).GetTracks(m, &grpc.GenericServerStream[GetTracksRequest, GetTracksResponse]{ServerStream: stream})
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type EngineLibraryService_GetTracksServer = grpc.ServerStreamingServer[GetTracksResponse]
 
 func _EngineLibraryService_GetSearchFilters_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetSearchFiltersRequest)
@@ -426,23 +439,16 @@ func _EngineLibraryService_PutEvents_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EngineLibraryService_SearchTracks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchTracksRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _EngineLibraryService_SearchTracks_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SearchTracksRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(EngineLibraryServiceServer).SearchTracks(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: EngineLibraryService_SearchTracks_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EngineLibraryServiceServer).SearchTracks(ctx, req.(*SearchTracksRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(EngineLibraryServiceServer).SearchTracks(m, &grpc.GenericServerStream[SearchTracksRequest, SearchTracksResponse]{ServerStream: stream})
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type EngineLibraryService_SearchTracksServer = grpc.ServerStreamingServer[SearchTracksResponse]
 
 // EngineLibraryService_ServiceDesc is the grpc.ServiceDesc for EngineLibraryService service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -451,10 +457,6 @@ var EngineLibraryService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "enginelibrary.v1.EngineLibraryService",
 	HandlerType: (*EngineLibraryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "EventStream",
-			Handler:    _EngineLibraryService_EventStream_Handler,
-		},
 		{
 			MethodName: "GetCredentials",
 			Handler:    _EngineLibraryService_GetCredentials_Handler,
@@ -466,10 +468,6 @@ var EngineLibraryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetLibrary",
 			Handler:    _EngineLibraryService_GetLibrary_Handler,
-		},
-		{
-			MethodName: "GetTracks",
-			Handler:    _EngineLibraryService_GetTracks_Handler,
 		},
 		{
 			MethodName: "GetSearchFilters",
@@ -491,11 +489,23 @@ var EngineLibraryService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "PutEvents",
 			Handler:    _EngineLibraryService_PutEvents_Handler,
 		},
+	},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "SearchTracks",
-			Handler:    _EngineLibraryService_SearchTracks_Handler,
+			StreamName:    "EventStream",
+			Handler:       _EngineLibraryService_EventStream_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetTracks",
+			Handler:       _EngineLibraryService_GetTracks_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "SearchTracks",
+			Handler:       _EngineLibraryService_SearchTracks_Handler,
+			ServerStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "proto/enginelibrary/service.proto",
 }

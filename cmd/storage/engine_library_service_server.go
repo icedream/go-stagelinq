@@ -10,6 +10,7 @@ import (
 
 	"github.com/icedream/go-stagelinq/eaas/proto/enginelibrary"
 	"github.com/lithammer/fuzzysearch/fuzzy"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -26,11 +27,12 @@ type EngineLibraryServiceServer struct {
 }
 
 // EventStream implements enginelibrary.EngineLibraryServiceServer.
-func (e *EngineLibraryServiceServer) EventStream(ctx context.Context, req *enginelibrary.EventStreamRequest) (*enginelibrary.EventStreamResponse, error) {
+func (e *EngineLibraryServiceServer) EventStream(req *enginelibrary.EventStreamRequest, stream grpc.ServerStreamingServer[enginelibrary.EventStreamResponse]) error {
 	log.Printf("EventStream: %+v", req)
-	return &enginelibrary.EventStreamResponse{
-		Event: []*enginelibrary.Event{},
-	}, nil
+	// The device expects to hold this open. Returning straight away makes it
+	// reconnect in a loop.
+	<-stream.Context().Done()
+	return nil
 }
 
 // GetCredentials implements enginelibrary.EngineLibraryServiceServer.
@@ -197,36 +199,20 @@ func (e *EngineLibraryServiceServer) GetTrack(ctx context.Context, req *engineli
 }
 
 // GetTracks implements enginelibrary.EngineLibraryServiceServer.
-func (e *EngineLibraryServiceServer) GetTracks(ctx context.Context, req *enginelibrary.GetTracksRequest) (*enginelibrary.GetTracksResponse, error) {
+func (e *EngineLibraryServiceServer) GetTracks(req *enginelibrary.GetTracksRequest, stream grpc.ServerStreamingServer[enginelibrary.GetTracksResponse]) error {
 	log.Printf("GetTracks: %+v", req)
+	tracks := []*enginelibrary.ListTrack{}
 	switch {
-	case req.GetPlaylistId() == demoPlaylist: // specific playlist
-		resp := &enginelibrary.GetTracksResponse{
-			Tracks: []*enginelibrary.ListTrack{},
-		}
+	case req.GetPlaylistId() == demoPlaylist, // specific playlist
+		req.GetLibraryId() == "" || req.GetLibraryId() == demoLibrary: // specific or default library
 		for _, trackID := range demoTrackIDs {
-			resp.Tracks = append(resp.Tracks, &enginelibrary.ListTrack{
+			tracks = append(tracks, &enginelibrary.ListTrack{
 				Metadata:       generateDemoTrackMetadata(trackID),
 				PreviewArtwork: demoTrackPreviewArtwork,
 			})
 		}
-		return resp, nil
-	case req.GetLibraryId() == "" || req.GetLibraryId() == demoLibrary: // specific or default library
-		resp := &enginelibrary.GetTracksResponse{
-			Tracks: []*enginelibrary.ListTrack{},
-		}
-		for _, trackID := range demoTrackIDs {
-			resp.Tracks = append(resp.Tracks, &enginelibrary.ListTrack{
-				Metadata:       generateDemoTrackMetadata(trackID),
-				PreviewArtwork: demoTrackPreviewArtwork,
-			})
-		}
-		return resp, nil
-	default: // neither playlist nor library match
-		return &enginelibrary.GetTracksResponse{
-			Tracks: []*enginelibrary.ListTrack{},
-		}, nil
 	}
+	return stream.Send(&enginelibrary.GetTracksResponse{Tracks: tracks})
 }
 
 // PutEvents implements enginelibrary.EngineLibraryServiceServer.
@@ -236,7 +222,7 @@ func (e *EngineLibraryServiceServer) PutEvents(ctx context.Context, req *enginel
 }
 
 // SearchTracks implements enginelibrary.EngineLibraryServiceServer.
-func (e *EngineLibraryServiceServer) SearchTracks(ctx context.Context, req *enginelibrary.SearchTracksRequest) (*enginelibrary.SearchTracksResponse, error) {
+func (e *EngineLibraryServiceServer) SearchTracks(req *enginelibrary.SearchTracksRequest, stream grpc.ServerStreamingServer[enginelibrary.SearchTracksResponse]) error {
 	log.Printf("SearchTracks: %+v", req)
 	resp := &enginelibrary.SearchTracksResponse{
 		Tracks: []*enginelibrary.ListTrack{},
@@ -303,5 +289,5 @@ trackLoop:
 			PreviewArtwork: demoTrackPreviewArtwork,
 		})
 	}
-	return resp, nil
+	return stream.Send(resp)
 }

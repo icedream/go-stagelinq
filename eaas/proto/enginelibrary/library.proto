@@ -170,6 +170,7 @@ message TrackPerformanceData {
   repeated LoopsEntry loops = 5;
   optional MainCue main_cue = 6;
   optional bytes overview_waveform = 7;
+  optional bytes overview_waveform_rgb = 10;
 }
 
 message TrackMetadata {

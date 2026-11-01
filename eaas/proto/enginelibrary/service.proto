@@ -156,11 +156,11 @@ message Sort {
 }
 
 service EngineLibraryService {
-  rpc EventStream(EventStreamRequest) returns (EventStreamResponse);
+  rpc EventStream(EventStreamRequest) returns (stream EventStreamResponse);
   rpc GetCredentials(GetCredentialsRequest) returns (GetCredentialsResponse);
   rpc GetLibraries(GetLibrariesRequest) returns (GetLibrariesResponse);
   rpc GetLibrary(GetLibraryRequest) returns (GetLibraryResponse);
-  rpc GetTracks(GetTracksRequest) returns (GetTracksResponse);
+  rpc GetTracks(GetTracksRequest) returns (stream GetTracksResponse);
   rpc GetSearchFilters(GetSearchFiltersRequest)
       returns (GetSearchFiltersResponse);
   rpc GetTrack(GetTrackRequest) returns (GetTrackResponse);
@@ -169,5 +169,5 @@ service EngineLibraryService {
   rpc GetHistorySessions(GetHistorySessionsRequest)
       returns (GetHistorySessionsResponse);
   rpc PutEvents(PutEventsRequest) returns (PutEventsResponse);
-  rpc SearchTracks(SearchTracksRequest) returns (SearchTracksResponse);
+  rpc SearchTracks(SearchTracksRequest) returns (stream SearchTracksResponse);
 }
